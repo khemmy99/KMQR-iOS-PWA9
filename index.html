@@ -87,6 +87,82 @@
       updateActivationStatus();
     };
     
+    // ========== DEVICE DETECTION ==========
+    window.detectDevice = function() {
+      const ua = navigator.userAgent.toLowerCase();
+      const platform = navigator.platform.toLowerCase();
+      
+      // Detect iOS (iPhone, iPad, iPod)
+      if (/iphone|ipad|ipod/.test(ua)) {
+        return 'ios';
+      }
+      
+      // Detect Android
+      if (/android/.test(ua)) {
+        return 'android';
+      }
+      
+      // Detect Windows
+      if (/win/.test(platform)) {
+        return 'windows';
+      }
+      
+      // Detect macOS
+      if (/mac/.test(platform)) {
+        return 'macos';
+      }
+      
+      // Detect Linux
+      if (/linux/.test(platform)) {
+        return 'linux';
+      }
+      
+      return 'unknown';
+    };
+    
+    window.showDeviceInfo = function() {
+      const device = detectDevice();
+      const deviceBanner = document.getElementById('deviceBanner');
+      const deviceText = document.getElementById('deviceText');
+      
+      if (!deviceBanner || !deviceText) return;
+      
+      let message = '';
+      let emoji = '';
+      
+      switch(device) {
+        case 'ios':
+          emoji = '📱';
+          message = 'iOS Device Detected - Add to Home Screen for offline access!';
+          break;
+        case 'android':
+          emoji = '📱';
+          message = 'Android Device Detected - Add to Home Screen for offline access!';
+          break;
+        case 'windows':
+          emoji = '💻';
+          message = 'Windows PC Detected - Desktop experience ready!';
+          break;
+        case 'macos':
+          emoji = '🍎';
+          message = 'macOS Detected - Add to Dock for quick access!';
+          break;
+        case 'linux':
+          emoji = '🐧';
+          message = 'Linux Detected - Desktop app ready!';
+          break;
+        default:
+          emoji = '🌐';
+          message = 'Web Browser Detected - Works on any device!';
+      }
+      
+      deviceText.innerHTML = `${emoji} ${message}`;
+      deviceBanner.style.display = 'flex';
+      
+      // Store device type
+      localStorage.setItem('kmqr_device_type', device);
+    };
+    
     window.handleBtnCancelLicense = function() {
       console.log('handleBtnCancelLicense called');
       localStorage.setItem('kmqr_welcome_shown', 'true');
@@ -648,6 +724,11 @@
   </style>
 </head>
 <body onload="initializeWelcome()">
+  <!-- Device Detection Banner -->
+  <div id="deviceBanner" style="display: none; background: linear-gradient(135deg, #3b82f6, #2563eb); padding: 10px 16px; text-align: center; color: white; font-weight: 500; font-size: 13px; border-bottom: 1px solid #1e40af; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
+    <span id="deviceText"></span>
+  </div>
+  
   <!-- Update Notification Banner -->
   <div id="updateBanner" style="display: none; background: linear-gradient(135deg, #f59e0b, #d97706); padding: 12px 16px; text-align: center; color: white; font-weight: 600; font-size: 13px; border-bottom: 1px solid #b45309; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
     🔄 New version available! <button id="updateNowBtn" style="background: white; color: #d97706; border: none; padding: 4px 12px; border-radius: 3px; font-weight: 700; cursor: pointer; margin-left: 8px; font-size: 12px;">Update Now</button>
@@ -1128,6 +1209,11 @@
       
       // Check for updates
       checkForUpdates();
+      
+      // Show device-specific info
+      setTimeout(() => {
+        showDeviceInfo();
+      }, 1000);
     }
 
     // ========== UPDATE CHECK SYSTEM ==========
