@@ -1,0 +1,1803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>KMQR Generator - QR Code Creator</title>
+  <link rel="icon" type="image/png" href="icon.png">
+  <link rel="shortcut icon" href="icon.png" type="image/png">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Hanuman:wght@400;700&display=swap" rel="stylesheet">
+  <script>
+    // SMART VERSION CHECK - Keep activation, only update code
+    const KMQR_VERSION = '1.0.8';
+    const versionKey = 'kmqr_version_loaded';
+    const storedVersion = localStorage.getItem(versionKey);
+    
+    if (storedVersion !== KMQR_VERSION) {
+      // NEW VERSION: Save activation state, clear old cache, update version
+      const activationState = localStorage.getItem('kmqr_app_activated');
+      const licenseCode = localStorage.getItem('kmqr_license_code');
+      
+      // Clear old stuff but KEEP activation
+      localStorage.clear();
+      
+      // Restore activation state
+      if (activationState) localStorage.setItem('kmqr_app_activated', activationState);
+      if (licenseCode) localStorage.setItem('kmqr_license_code', licenseCode);
+      
+      // Update version
+      localStorage.setItem(versionKey, KMQR_VERSION);
+      localStorage.setItem('kmqr_welcome_shown', 'true'); // Skip welcome if already activated
+      
+      // Quick refresh to load new code (only once per version)
+      window.location.href = window.location.href.split('?')[0] + '?v=' + KMQR_VERSION;
+    }
+    
+    // Define handler functions EARLY so they're available for onclick handlers
+    window.handleBtnEnterLicense = function() {
+      console.log('handleBtnEnterLicense called');
+      document.getElementById('welcomeModal').style.display = 'none';
+      document.getElementById('licenseModal').classList.add('active');
+      document.getElementById('licenseModal').style.display = 'flex';
+    };
+    
+    window.handleBtnSkipTrial = function() {
+      console.log('handleBtnSkipTrial called');
+      localStorage.setItem('kmqr_welcome_shown', 'true');
+      localStorage.setItem('kmqr_app_activated', 'false');
+      document.getElementById('welcomeModal').style.display = 'none';
+      document.querySelectorAll('.container').forEach(el => el.style.display = 'block');
+      document.querySelectorAll('.main-wrapper').forEach(el => el.style.display = 'flex');
+      document.querySelectorAll('[style*="position: sticky"]').forEach(el => el.style.display = 'flex');
+      updateActivationStatus();
+    };
+    
+    window.handleBtnActivateLicense = function() {
+      console.log('handleBtnActivateLicense called');
+      const licenseInput = document.getElementById('licenseCodeInput');
+      const licenseCode = licenseInput.value.trim();
+      
+      if (!licenseCode) {
+        alert('❌ Please enter a license code');
+        return;
+      }
+      
+      if (!licenseCode.startsWith('KMQR-') && !licenseCode.startsWith('TRIAL-')) {
+        alert('❌ Invalid license code format.\n\nValid codes start with KMQR- or TRIAL-\n\nExample: KMQR-ABC123');
+        return;
+      }
+      
+      localStorage.setItem('kmqr_welcome_shown', 'true');
+      localStorage.setItem('kmqr_app_activated', 'true');
+      localStorage.setItem('kmqr_license_code', licenseCode);
+      
+      document.getElementById('licenseModal').classList.remove('active');
+      document.getElementById('licenseModal').style.display = 'none';
+      document.getElementById('welcomeModal').style.display = 'none';
+      document.querySelectorAll('.container').forEach(el => el.style.display = 'block');
+      document.querySelectorAll('.main-wrapper').forEach(el => el.style.display = 'flex');
+      document.querySelectorAll('[style*="position: sticky"]').forEach(el => el.style.display = 'flex');
+      
+      licenseInput.value = '';
+      updateActivationStatus();
+    };
+    
+    window.handleBtnCancelLicense = function() {
+      console.log('handleBtnCancelLicense called');
+      localStorage.setItem('kmqr_welcome_shown', 'true');
+      localStorage.setItem('kmqr_app_activated', 'false');
+      
+      document.getElementById('licenseModal').classList.remove('active');
+      document.getElementById('licenseModal').style.display = 'none';
+      document.querySelectorAll('.container').forEach(el => el.style.display = 'block');
+      document.querySelectorAll('.main-wrapper').forEach(el => el.style.display = 'flex');
+      document.querySelectorAll('[style*="position: sticky"]').forEach(el => el.style.display = 'flex');
+      
+      const licenseInput = document.getElementById('licenseCodeInput');
+      licenseInput.value = '';
+      
+      updateActivationStatus();
+    };
+  </script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      color: #e2e8f0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Hanuman', sans-serif;
+      padding: 8px;
+      min-height: 100vh;
+    }
+
+    .khmer-text {
+      font-family: 'Hanuman', 'Khmer OS Siemreap', 'Siemreap', sans-serif;
+      font-size: 16px;
+    }
+
+    /* Khmer font for buttons - ensure clear rendering */
+    button.primary,
+    button.secondary,
+    button.ghost {
+      font-family: 'Hanuman', 'Khmer OS Siemreap', 'Siemreap', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    /* Khmer font for input fields and labels */
+    input[type="text"],
+    input[type="color"],
+    select {
+      font-family: 'Hanuman', 'Khmer OS Siemreap', 'Siemreap', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .section-title,
+    label {
+      font-family: 'Hanuman', 'Khmer OS Siemreap', 'Siemreap', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .lang-toggle {
+      display: none;
+    }
+
+    /* Loading Screen */
+    #loadingScreen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      z-index: 9999;
+      transition: opacity 0.5s ease;
+    }
+
+    #loadingScreen.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid #334155;
+      border-top: 4px solid #3b82f6;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 20px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      color: #cbd5e1;
+      font-size: 16px;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .main-wrapper {
+      max-width: 1400px;
+      margin: 20px auto;
+      display: flex;
+      gap: 24px;
+      padding: 0 8px;
+    }
+
+    .container {
+      flex: 1;
+      background: #1e293b;
+      border-radius: 0;
+      padding: 24px;
+      box-shadow: none;
+      position: relative;
+      z-index: 100;
+      border: 1px solid #334155;
+    }
+
+    #activationStatus {
+      display: none;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 24px;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .section {
+      background: #0f172a;
+      padding: 16px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #cbd5e1;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input[type="text"],
+    input[type="color"],
+    select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      background: #1e293b;
+      color: #e2e8f0;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    input[type="color"] {
+      padding: 8px;
+      cursor: pointer;
+    }
+
+    select {
+      cursor: pointer;
+    }
+
+    input[type="text"]::placeholder {
+      color: #64748b;
+    }
+
+    input:focus,
+    select:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .color-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .color-row > div {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .color-row label {
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: #cbd5e1;
+    }
+
+    .color-row input[type="color"] {
+      margin-bottom: 0;
+      height: 44px;
+      cursor: pointer;
+    }
+
+    button {
+      padding: 10px 14px;
+      border: none;
+      border-radius: 4px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.2s;
+      width: 100%;
+      margin-top: 8px;
+      pointer-events: auto;
+      touch-action: manipulation;
+      min-height: 38px;
+    }
+
+    button.primary {
+      background: linear-gradient(135deg, #3b82f6, #2563eb);
+      color: white;
+      margin-top: 12px;
+    }
+
+    button.primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 16px rgba(59, 130, 246, 0.25);
+    }
+
+    button.primary:active {
+      transform: translateY(0);
+    }
+
+    button.secondary {
+      background: linear-gradient(135deg, #475569, #334155);
+      color: white;
+      margin-top: 0;
+      border: 1px solid #64748b;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    button.secondary:hover:not(:disabled) {
+      background: linear-gradient(135deg, #64748b, #475569);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+    }
+
+    button.secondary:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    button.secondary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    button.ghost {
+      background: transparent;
+      color: #cbd5e1;
+      border: 1px solid #475569;
+      margin-top: 0;
+      transition: all 0.2s;
+    }
+
+    button.ghost:hover {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.05));
+      color: #e2e8f0;
+      border-color: #3b82f6;
+      box-shadow: 0 2px 6px rgba(59, 130, 246, 0.15);
+      transform: translateY(-1px);
+    }
+
+    button.ghost:active {
+      transform: translateY(0);
+    }
+
+    .button-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .button-group.full {
+      grid-template-columns: 1fr;
+    }
+
+    #qrPreview {
+      text-align: center;
+      padding: 20px;
+      background: #0f172a;
+      border-radius: 8px;
+      min-height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    #qrPreview canvas {
+      max-width: 100%;
+      height: auto;
+      border-radius: 6px;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
+    #qrPreview p {
+      color: #64748b;
+      font-size: 14px;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 5000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      overflow: auto;
+      pointer-events: auto;
+    }
+    
+    .modal > * {
+      pointer-events: auto;
+    }
+
+    .modal.active {
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: #1e293b;
+      padding: 24px;
+      border-radius: 12px;
+      max-width: 600px;
+      width: 90%;
+      color: #e2e8f0;
+      position: relative;
+      z-index: 5001;
+      margin: 20px auto;
+      max-height: 85vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      border: 1px solid #334155;
+    }
+    
+    .modal-content button {
+      pointer-events: auto;
+      touch-action: manipulation;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    
+    .modal-content input {
+      pointer-events: auto;
+      touch-action: manipulation;
+    }
+
+    .modal-content h2 {
+      margin-bottom: 16px;
+      color: #10b981;
+      font-size: 22px;
+      text-align: center;
+    }
+
+    #helpContent,
+    #aboutContent {
+      line-height: 1.8;
+      color: #cbd5e1;
+      font-size: 14px;
+      text-align: left;
+    }
+
+    #helpContent p,
+    #aboutContent p {
+      margin-bottom: 12px;
+      color: #e2e8f0;
+    }
+
+    #helpContent a,
+    #aboutContent a {
+      color: #3b82f6;
+      text-decoration: none;
+      word-break: break-word;
+    }
+
+    #helpContent a:hover,
+    #aboutContent a:hover {
+      color: #60a5fa;
+      text-decoration: underline;
+    }
+
+    #helpContent hr,
+    #aboutContent hr {
+      margin: 16px 0;
+      border: none;
+      border-top: 1px solid #475569;
+    }
+
+    .modal-content p {
+      line-height: 1.8;
+      margin-bottom: 12px;
+      font-size: 14px;
+      color: #cbd5e1;
+    }
+
+    .modal-content a {
+      color: #3b82f6;
+      text-decoration: none;
+      word-break: break-word;
+    }
+
+    .modal-content a:hover {
+      text-decoration: underline;
+      color: #60a5fa;
+    }
+
+    .close-btn {
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+      color: #64748b;
+      background: none;
+      border: none;
+      padding: 4px 8px;
+      width: auto;
+      margin: -8px -8px 0 0;
+      line-height: 1;
+      transition: color 0.2s;
+      pointer-events: auto !important;
+      z-index: 5002;
+      position: relative;
+    }
+
+    .close-btn:hover {
+      color: #ef4444;
+    }
+    
+    .close-btn:active {
+      color: #dc2626;
+    }
+
+    .logo-preview {
+      margin-top: 8px;
+      padding: 8px;
+      background: #0f172a;
+      border-radius: 4px;
+      text-align: center;
+      max-height: 80px;
+    }
+
+    .logo-preview img {
+      max-width: 100%;
+      max-height: 80px;
+      border-radius: 4px;
+    }
+
+    .logo-preview p {
+      color: #64748b;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        padding: 16px;
+      }
+      
+      #qrPreview {
+        grid-column: 1;
+        grid-row: auto;
+        margin-top: 20px;
+      }
+      
+      h1 { font-size: 18px; }
+      button { font-size: 12px; padding: 10px 12px; min-height: 36px; }
+      input, select { font-size: 14px; padding: 10px; }
+    }
+
+    /* Mobile (< 480px) */
+    @media (max-width: 480px) {
+      body { padding: 4px; }
+      .container { 
+        max-width: 95vw; 
+        margin: 10px auto; 
+        padding: 12px;
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      
+      h1 { font-size: 16px; }
+      .button-group { grid-template-columns: 1fr 1fr; }
+      button { font-size: 11px; padding: 8px 6px; min-height: 36px; }
+      input, select { font-size: 16px; padding: 12px; }
+      .section { padding: 12px; }
+      
+      #qrPreview {
+        grid-column: 1;
+        grid-row: auto;
+        min-height: 200px;
+      }
+      
+      /* Mobile welcome modal */
+      .modal-content {
+        width: 95vw !important;
+        max-width: 95vw !important;
+        margin: 20px auto !important;
+        padding: 16px !important;
+      }
+      
+      .modal-content button {
+        padding: 12px !important;
+        font-size: 13px !important;
+        min-height: 44px !important;
+        width: 100% !important;
+      }
+    }
+
+    /* Desktop (> 768px) */
+    @media (min-width: 769px) {
+      .container {
+        grid-template-columns: 1fr 1fr;
+        max-width: 1400px;
+      }
+      
+      button {
+        min-height: 40px;
+        font-size: 14px;
+        padding: 12px 18px;
+      }
+      
+      input[type="text"],
+      input[type="color"],
+      select {
+        font-size: 14px;
+        padding: 10px 12px;
+      }
+      
+      #qrPreview {
+        min-height: 500px;
+        grid-column: 2;
+        grid-row: 2;
+      }
+    }
+  </style>
+</head>
+<body onload="initializeWelcome()">
+  <!-- Update Notification Banner -->
+  <div id="updateBanner" style="display: none; background: linear-gradient(135deg, #f59e0b, #d97706); padding: 12px 16px; text-align: center; color: white; font-weight: 600; font-size: 13px; border-bottom: 1px solid #b45309; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
+    🔄 New version available! <button id="updateNowBtn" style="background: white; color: #d97706; border: none; padding: 4px 12px; border-radius: 3px; font-weight: 700; cursor: pointer; margin-left: 8px; font-size: 12px;">Update Now</button>
+  </div>
+
+  <!-- Loading Screen -->
+  <div id="loadingScreen">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Loading KMQR Generator...</div>
+  </div>
+
+  <!-- Welcome Choice Screen - First Time Only -->
+  <div id="welcomeModal" style="display: block; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 9999; padding: 40px 20px; text-align: center; overflow-y: auto;">
+    <h2 style="color: #3b82f6; margin: 0 0 12px 0; font-size: 28px;">🎉 Welcome to KMQR</h2>
+    <p style="color: #cbd5e1; margin: 0 0 30px 0; font-size: 14px;">Generate QR codes with professional features</p>
+    
+    <button id="btnEnterLicense" type="button" onclick="try { handleBtnEnterLicense(); } catch(e) { console.error('Error:', e); alert('Error: ' + e.message); }" style="display: block; width: 95%; max-width: 350px; margin: 20px auto; padding: 24px; background: #10b981; color: white; border: 2px solid #10b981; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 18px; min-height: 60px; position: relative; z-index: 10000; pointer-events: auto;">✅ Enter License</button>
+    
+    <button id="btnSkipTrial" type="button" onclick="try { handleBtnSkipTrial(); } catch(e) { console.error('Error:', e); alert('Error: ' + e.message); }" style="display: block; width: 95%; max-width: 350px; margin: 15px auto; padding: 16px; background: transparent; color: #60a5fa; border: 2px solid #60a5fa; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; min-height: 50px; position: relative; z-index: 10000; pointer-events: auto;">⏭️ Try Free</button>
+    
+    <p style="color: #64748b; font-size: 12px; margin-top: 20px;">Trial mode: Generate & customize QR codes freely<br>Full license: Unlock all download formats</p>
+  </div>
+
+  <!-- License Code Activation Modal -->
+  <div id="licenseModal" class="modal">
+    <div class="modal-content" style="max-width: 450px;">
+      <h2 style="color: #10b981; text-align: center; margin-bottom: 20px;">🔓 Enter License Code</h2>
+      
+      <div style="background: #0f172a; padding: 16px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #334155;">
+        <p style="font-size: 13px; color: #cbd5e1; margin-bottom: 12px;">
+          <strong>Paste your license code below to unlock full features:</strong>
+        </p>
+        
+        <input type="text" id="licenseCodeInput" placeholder="Enter your license code here..." style="width: 100%; padding: 12px; border: 1px solid #475569; border-radius: 6px; background: #1e293b; color: #e2e8f0; font-size: 14px; margin-bottom: 12px; font-family: monospace; touch-action: manipulation; pointer-events: auto;">
+        
+        <p style="font-size: 12px; color: #94a3b8; line-height: 1.6;">
+          📧 Don't have a license code?<br>
+          Contact: <strong>my.khem.mathst@gmail.com</strong><br>
+          📱 Phone: <strong>+855 66/99 931319</strong><br>
+          💬 Telegram: <strong>@khemmy99</strong>
+        </p>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <button id="btnActivateLicense" type="button" onclick="try { handleBtnActivateLicense(); } catch(e) { console.error('Error:', e); alert('Error: ' + e.message); }" style="padding: 14px; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; min-height: 50px; width: 100%; pointer-events: auto; touch-action: manipulation; -webkit-user-select: none; user-select: none;">✅ Activate</button>
+        <button id="btnCancelLicense" type="button" onclick="try { handleBtnCancelLicense(); } catch(e) { console.error('Error:', e); alert('Error: ' + e.message); }" style="padding: 14px; background: #64748b; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; min-height: 50px; width: 100%; pointer-events: auto; touch-action: manipulation; -webkit-user-select: none; user-select: none;">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header with Title and Buttons -->
+  <div style="background: #1e293b; border-bottom: 1px solid #334155; padding: 6px 10px; position: sticky; top: 0; z-index: 102; display: flex; justify-content: space-between; align-items: center; gap: 6px; flex-wrap: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
+    <h1 id="title" style="margin: 0; font-size: 20px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; white-space: nowrap; flex-shrink: 0; font-weight: 700; letter-spacing: 0.5px; line-height: 1; display: flex; align-items: center; height: 40px;">KMQR Generator</h1>
+    <div style="display: flex; gap: 4px; align-items: center; height: 40px;">
+      <button id="activateBtn" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 4px 4px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; box-shadow: 0 2px 6px rgba(16,185,129,0.25); min-height: 28px; display: flex; align-items: center; justify-content: center; line-height: 1;" onclick="document.getElementById('helpModal').classList.remove('active'); document.getElementById('helpModal').style.display = 'none'; document.getElementById('aboutModal').classList.remove('active'); document.getElementById('aboutModal').style.display = 'none'; document.getElementById('licenseModal').classList.add('active'); document.getElementById('licenseModal').style.display = 'flex';">🔓 Activate</button>
+      <button id="btnHelp2" style="background: #475569; color: #e2e8f0; border: 1px solid #64748b; padding: 4px 4px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; min-height: 28px; display: flex; align-items: center; justify-content: center; line-height: 1;" onclick="document.getElementById('helpModal').classList.add('active'); document.getElementById('helpModal').style.display = 'flex'; document.getElementById('aboutModal').classList.remove('active'); document.getElementById('aboutModal').style.display = 'none'; document.getElementById('licenseModal').classList.remove('active'); document.getElementById('licenseModal').style.display = 'none';">❓ Help</button>
+      <button id="btnAbout2" style="background: #475569; color: #e2e8f0; border: 1px solid #64748b; padding: 4px 4px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; min-height: 28px; display: flex; align-items: center; justify-content: center; line-height: 1;" onclick="document.getElementById('aboutModal').classList.add('active'); document.getElementById('aboutModal').style.display = 'flex'; document.getElementById('helpModal').classList.remove('active'); document.getElementById('helpModal').style.display = 'none'; document.getElementById('licenseModal').classList.remove('active'); document.getElementById('licenseModal').style.display = 'none';">ℹ️ About</button>
+      <button id="langToggle" style="background: #475569; color: #e2e8f0; border: 1px solid #64748b; padding: 4px 4px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; min-height: 28px; display: flex; align-items: center; justify-content: center; line-height: 1;">🌐 ខ្មែរ</button>
+      <button id="updateCheckBtn" style="background: #64748b; color: #e2e8f0; border: 1px solid #94a3b8; padding: 4px 4px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; min-height: 28px; display: flex; align-items: center; justify-content: center; line-height: 1;">🔄 Update</button>
+    </div>
+  </div>
+  </div>
+  
+  <div class="main-wrapper">
+    <div class="container">
+      <div class="section">
+      <div class="section-title" id="textLabel">Text or URL</div>
+      <input id="qrText" type="text" placeholder="Enter text..." />
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-top: 12px;">
+        <div>
+          <label id="sizeLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">Size</label>
+          <select id="qrSize">
+            <option value="200">200</option>
+            <option value="256">256</option>
+            <option value="320">320</option>
+            <option value="400">400</option>
+          </select>
+        </div>
+        <div>
+          <label id="ecLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">Error Correction</label>
+          <select id="qrEC">
+            <option value="L" id="ecLow">Low</option>
+            <option value="M" selected id="ecMedium">Medium</option>
+            <option value="Q" id="ecQuartile">Quartile</option>
+            <option value="H" id="ecHigh">High</option>
+          </select>
+        </div>
+        <div>
+          <label id="dpiLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">Quality (DPI)</label>
+          <select id="dpiScale">
+            <option value="1">1×</option>
+            <option value="2" selected>2×</option>
+            <option value="3">3×</option>
+          </select>
+        </div>
+        <div>
+          <label id="roundLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">Round Logo</label>
+          <select id="logoRound">
+            <option value="no" id="no">No</option>
+            <option value="yes" selected id="yes">Yes</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="color-row" style="margin-top: 8px; grid-template-columns: 1fr 1fr 1fr;">
+        <div>
+          <label id="fgLabel">Foreground</label>
+          <input id="qrFG" type="color" value="#000000" />
+        </div>
+        <div>
+          <label id="bgLabel">Background</label>
+          <input id="qrBG" type="color" value="#ffffff" />
+        </div>
+        <div>
+          <label id="logoBgLabel">Logo BG</label>
+          <input id="logoBg" type="color" value="#ffffff" />
+        </div>
+      </div>
+
+      <div>
+        <label id="captionLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">Overlay Text</label>
+        <input id="overlayText" type="text" placeholder="e.g. KHEM MY" />
+      </div>
+
+      <div>
+        <label id="logoLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">Choose Logo</label>
+        <button id="logoUploadBtn" class="secondary" style="margin-top: 0;" onclick="document.getElementById('logoUpload').click();">📁 Select Image</button>
+        <input id="logoUpload" type="file" accept="image/*" style="display: none;" onchange="handleLogoUpload(this);" />
+        <div id="logoPreview" class="logo-preview" style="display: none;"></div>
+      </div>
+      
+      <button class="primary" id="btnGenerate" onclick="
+        var elText = document.getElementById('qrText');
+        var elSize = document.getElementById('qrSize');
+        var elEC = document.getElementById('qrEC');
+        var elFG = document.getElementById('qrFG');
+        var elBG = document.getElementById('qrBG');
+        var qrPreview = document.getElementById('qrPreview');
+        
+        if (!elText || !elText.value) {
+          alert('Please enter text or URL');
+        } else {
+          try {
+            qrPreview.innerHTML = '';
+            var size = parseInt(elSize.value);
+            var tempDiv = document.createElement('div');
+            tempDiv.style.display = 'none';
+            tempDiv.id = 'qr-temp-' + Date.now();
+            document.body.appendChild(tempDiv);
+            
+            var qrInstance = new QRCode(tempDiv, {
+              text: elText.value,
+              width: size,
+              height: size,
+              colorDark: elFG.value,
+              colorLight: elBG.value,
+              correctLevel: QRCode.CorrectLevel[elEC.value]
+            });
+            
+            setTimeout(() => {
+              var canvas = tempDiv.querySelector('canvas');
+              if (canvas) {
+                exportCanvas = canvas;
+                var imgData = canvas.toDataURL('image/png');
+                var img = document.createElement('img');
+                img.src = imgData;
+                img.style.maxWidth = '100%';
+                img.style.borderRadius = '6px';
+                qrPreview.innerHTML = '';
+                qrPreview.appendChild(img);
+                document.getElementById('btnDownload').disabled = false;
+                document.getElementById('btnShare').disabled = false;
+              }
+              if (document.body.contains(tempDiv)) {
+                document.body.removeChild(tempDiv);
+              }
+            }, 100);
+          } catch (error) {
+            alert('Error: ' + error.message);
+          }
+        }
+      ">Generate QR</button>
+      
+      <button class="ghost" id="btnClear" onclick="document.getElementById('qrText').value = ''; document.getElementById('overlayText').value = ''; document.getElementById('logoPreview').style.display = 'none'; document.getElementById('qrPreview').innerHTML = '<p id=previewHint>Enter text and click Generate</p>'; document.getElementById('btnDownload').disabled = true; document.getElementById('btnShare').disabled = true;" style="width: 100%; margin-top: 12px;">Clear</button>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;">
+        <button class="secondary" id="btnDownload" disabled onclick="var m = document.getElementById('downloadMenu'); m.style.display = m.style.display === 'block' ? 'none' : 'block';">📥 Download</button>
+        <button class="secondary" id="btnShare" disabled onclick="var m = document.getElementById('shareMenu'); m.style.display = m.style.display === 'block' ? 'none' : 'block';">📤 Share</button>
+      </div>
+      </div>
+    </div>
+
+    <!-- Right side: Preview only -->
+    <div class="container">
+      <div class="section">
+      <div style="font-size: 14px; font-weight: 700; color: #cbd5e1; margin-bottom: 12px;">Preview</div>
+      <div id="qrPreview"><p id="previewHint">Enter text and click Generate</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Download Format Selector -->
+  <div id="downloadMenu" style="display: none; background: #0f172a; padding: 12px; border-radius: 6px; margin: 20px auto; max-width: 1400px; border: 1px solid #334155; margin-left: 8px; margin-right: 8px;">
+    <p style="font-size: 12px; color: #cbd5e1; margin-bottom: 8px; font-weight: 600;">Download Format:</p>
+    <div class="button-group">
+      <button class="ghost" id="downloadPNG" onclick="downloadCanvas('png');">📄 PNG</button>
+      <button class="ghost" id="downloadJPG" onclick="downloadCanvas('jpg');">📄 JPG</button>
+      <button class="ghost" id="downloadPDF" onclick="downloadCanvas('pdf');">📄 PDF</button>
+    </div>
+  </div>
+
+  <!-- Share Menu -->
+  <div id="shareMenu" style="display: none; background: #0f172a; padding: 12px; border-radius: 6px; margin: 0 auto 20px; max-width: 1400px; border: 1px solid #334155; margin-left: 8px; margin-right: 8px;">
+    <p style="font-size: 12px; color: #cbd5e1; margin-bottom: 8px; font-weight: 600;">Share to:</p>
+    <div class="button-group full">
+      <button class="ghost" id="shareWhatsApp" onclick="shareToSocial('whatsapp');">📱 WhatsApp</button>
+      <button class="ghost" id="shareFacebook" onclick="shareToSocial('facebook');">👍 Facebook</button>
+      <button class="ghost" id="shareTwitter" onclick="shareToSocial('twitter');">𝕏 Twitter</button>
+      <button class="ghost" id="shareTelegram" onclick="shareToSocial('telegram');">💬 Telegram</button>
+    </div>
+    <div class="button-group full" style="margin-top: 8px;">
+      <button class="ghost" id="shareCopy" onclick="shareToSocial('copy');">📋 Copy Link</button>
+      <button class="ghost" id="shareEmail" onclick="shareToSocial('email');">📧 Email</button>
+    </div>
+  </div>
+
+  <!-- Help Modal -->
+  <div id="helpModal" class="modal">
+    <div class="modal-content" style="max-width: 420px;">
+      <button class="close-btn" style="position: absolute; top: 18px; right: 18px; font-size: 36px; color: #94a3b8; background: none; border: none; cursor: pointer;" onclick="document.getElementById('helpModal').classList.remove('active'); document.getElementById('helpModal').style.display = 'none';">&times;</button>
+      <h2 id="helpTitle" style="color: #22d3a9; font-size: 32px; font-weight: 700; margin: 0 0 18px 0; text-align: center;">Help</h2>
+      <div id="helpContent" style="font-size:16px;line-height:1.7;color:#e2e8f0;">
+        <h3 style="color:#3b82f6;margin-bottom:10px;text-align:center;font-size:20px;">How to Use KMQR Generator</h3>
+        <ol style="margin-bottom:10px;padding-left:20px;">
+          <li>Enter your text or URL in the input box.</li>
+          <li>Choose size, error correction, and colors as needed.</li>
+          <li>(Optional) Add a logo and overlay text.</li>
+          <li>Click <b>Generate QR</b> to preview your code.</li>
+          <li>Click <b>Download</b> to save as PNG, JPG, or PDF.<br>Click <b>Share</b> to send via WhatsApp, Facebook, etc.</li>
+        </ol>
+        <hr style="margin:16px 0;border:none;border-top:1px solid #475569;">
+        <b>Features:</b>
+        <ul style="margin-bottom:10px;padding-left:20px;">
+          <li>Offline QR code generation</li>
+          <li>Logo overlay and caption</li>
+          <li>High-DPI export (1x, 2x, 3x)</li>
+          <li>Bilingual UI (English/Khmer)</li>
+          <li>Activation for full download</li>
+        </ul>
+        <hr style="margin:16px 0;border:none;border-top:1px solid #475569;">
+        <b>Contact & Support:</b>
+        <div style="margin-top:10px;">
+          📧 Email: <a href="mailto:my.khem.mathst@gmail.com" style="color:#3b82f6;">my.khem.mathst@gmail.com</a><br>
+          📱 Phone: <a href="tel:+855669931319" style="color:#3b82f6;">+855 66/99 931319</a><br>
+          💬 Telegram: <a href="https://t.me/khemmy99" target="_blank" style="color:#3b82f6;">@khemmy99</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- About Modal -->
+  <div id="aboutModal" class="modal">
+    <div class="modal-content" style="max-width: 420px;">
+      <button class="close-btn" onclick="document.getElementById('aboutModal').classList.remove('active'); document.getElementById('aboutModal').style.display = 'none';">&times;</button>
+      <h2 id="aboutTitle" style="color: #3b82f6; font-size: 28px; font-weight: 700; margin: 0 0 12px 0; text-align: center;">About KMQR Generator</h2>
+      <div id="aboutContent" style="font-size:16px;line-height:1.7;color:#e2e8f0;">
+        <p><strong>Version:</strong> 1.0.8</p>
+        <p>KMQR Generator is a professional offline QR code generator for Windows, Android, iOS, and Web. It supports logo overlays, captions, color customization, and high-quality export.</p>
+        <hr style="margin:16px 0;border:none;border-top:1px solid #475569;">
+        <b>Developer:</b> Khem My<br>
+        Email: <a href="mailto:my.khem.mathst@gmail.com" style="color:#3b82f6;">my.khem.mathst@gmail.com</a><br>
+        Phone: <a href="tel:+8556699313199" style="color:#3b82f6;">+855 66/99 931319</a><br>
+        Telegram: <a href="https://t.me/khemmy99" target="_blank" style="color:#3b82f6;">@khemmy99</a><br>
+        Facebook: <a href="https://facebook.com/KMLOL" target="_blank" style="color:#3b82f6;">facebook.com/KMLOL</a>
+        <hr style="margin:16px 0;border:none;border-top:1px solid #475569;">
+        <b>Copyright:</b> © 2024-2026 Khem My. All rights reserved.
+      </div>
+    </div>
+  </div>
+
+  <!-- License Activation Modal -->
+  <div id="activationModal" class="modal">
+    <div class="modal-content" style="max-width: 450px;">
+      <h2 style="color: #10b981; text-align: center; margin-bottom: 20px;">🎉 Unlock Full Features</h2>
+      
+      <div style="background: linear-gradient(135deg, #1e293b, #0f172a); padding: 16px; border-radius: 8px; margin-bottom: 16px; border: 2px solid #10b981;">
+        <p style="font-size: 13px; color: #cbd5e1; margin-bottom: 12px; text-align: center;">
+          <strong>Trial Mode:</strong> Generate QR codes freely
+        </p>
+        
+        <p style="font-size: 13px; color: #cbd5e1; margin-bottom: 12px; text-align: center; line-height: 1.6;">
+          <strong style="color: #10b981;">✅ Currently Available:</strong><br>
+          Generate QR codes with all customization options
+        </p>
+
+        <p style="font-size: 13px; color: #fbbf24; margin-bottom: 12px; text-align: center; line-height: 1.6; background: #1e293b; padding: 10px; border-radius: 6px; border: 1px solid #fbbf24;">
+          <strong>🔒 Download is Locked</strong><br>
+          Click ACTIVATE to unlock all download formats
+        </p>
+
+        <div style="background: #0f172a; padding: 12px; border-radius: 6px; border: 1px solid #475569; margin-bottom: 12px;">
+          <p style="font-size: 12px; color: #cbd5e1; line-height: 1.6; margin-bottom: 8px;">
+            <strong>✨ Full Version Unlocks:</strong>
+          </p>
+          <p style="font-size: 12px; color: #cbd5e1; line-height: 1.8;">
+            ✓ Download PNG format<br>
+            ✓ Download JPG format<br>
+            ✓ Download PDF format<br>
+            ✓ Unlimited QR codes<br>
+            ✓ All customization options
+          </p>
+        </div>
+      </div>
+
+      <button id="acceptLicense" class="primary" style="width: 100%; margin-top: 8px; background: linear-gradient(135deg, #10b981, #059669); border: none; cursor: pointer;">🎉 Activate Now</button>
+    </div>
+  </div>
+
+  <script>
+    // ========== LICENSE ACTIVATION SYSTEM ==========
+    function generateLicenseKey() {
+      // Trial mode - no key needed
+      return 'TRIAL-MODE';
+    }
+
+    function initializeLicense() {
+      // App starts in TRIAL MODE by default unless user activated
+      const isActivated = localStorage.getItem('kmqr_app_activated') === 'true';
+      
+      // Hide activation modal unless user chooses to activate from welcome
+      document.getElementById('activationModal').classList.remove('active');
+    }
+
+    function copyTrialID() {
+      // Not used in new trial mode
+      return;
+    }
+
+    // Global handler functions for welcome buttons
+    // (These are now handled via inline onclick for better compatibility)
+    
+    // Global variables
+    let exportCanvas = null;
+    let logoImage = null;
+    
+    // Handle logo upload
+    function handleLogoUpload(input) {
+      if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const reader = new FileReader();
+        
+        reader.onload = (event) => {
+          logoImage = new Image();
+          logoImage.onload = () => {
+            document.getElementById('logoPreview').innerHTML = '<p>✓ ' + file.name + '</p>';
+            document.getElementById('logoPreview').style.display = 'block';
+          };
+          logoImage.onerror = () => {
+            alert('Failed to load logo image. Try a different file.');
+            logoImage = null;
+            document.getElementById('logoPreview').style.display = 'none';
+            input.value = '';
+          };
+          logoImage.src = event.target.result;
+        };
+        reader.onerror = () => {
+          alert('Failed to read file');
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+    
+    // Wrapper function for Generate button (kept for compatibility)
+    window.generateQRCode = function() {
+      const elText = document.getElementById('qrText');
+      const elSize = document.getElementById('qrSize');
+      const elEC = document.getElementById('qrEC');
+      const elFG = document.getElementById('qrFG');
+      const elBG = document.getElementById('qrBG');
+      const qrPreview = document.getElementById('qrPreview');
+      
+      if (!elText || !elText.value) {
+        alert('Please enter text or URL');
+        return;
+      }
+
+      try {
+        qrPreview.innerHTML = '';
+        const size = parseInt(elSize.value);
+
+        const tempDiv = document.createElement('div');
+        tempDiv.style.display = 'none';
+        tempDiv.id = 'qr-temp-' + Date.now();
+        document.body.appendChild(tempDiv);
+
+        const qrInstance = new QRCode(tempDiv, {
+          text: elText.value,
+          width: size,
+          height: size,
+          colorDark: elFG.value,
+          colorLight: elBG.value,
+          correctLevel: QRCode.CorrectLevel[elEC.value]
+        });
+
+        setTimeout(() => {
+          try {
+            const canvas = tempDiv.querySelector('canvas');
+            if (canvas) {
+              exportCanvas = canvas;
+              const imgData = canvas.toDataURL('image/png');
+              const img = document.createElement('img');
+              img.src = imgData;
+              img.style.maxWidth = '100%';
+              img.style.borderRadius = '6px';
+              qrPreview.innerHTML = '';
+              qrPreview.appendChild(img);
+              document.getElementById('btnDownload').disabled = false;
+              document.getElementById('btnShare').disabled = false;
+            }
+            if (document.body.contains(tempDiv)) {
+              document.body.removeChild(tempDiv);
+            }
+          } catch (error) {
+            console.error('Error processing canvas:', error);
+            qrPreview.innerHTML = '<p style="color: #ef4444;">Error generating QR code</p>';
+            if (document.body.contains(tempDiv)) {
+              document.body.removeChild(tempDiv);
+            }
+          }
+        }, 100);
+      } catch (error) {
+        console.error('Generate error:', error);
+        alert('Error: ' + error.message);
+      }
+    };
+    
+    // Initialize welcome screen immediately when script loads
+    function initializeWelcome() {
+      console.log('initializeWelcome() called');
+      
+      // Check if user has ALREADY SEEN WELCOME (strict check)
+      const hasSeenWelcome = localStorage.getItem('kmqr_welcome_shown') === 'true';
+      
+      const welcomeModal = document.getElementById('welcomeModal');
+      
+      console.log('hasSeenWelcome (strict):', hasSeenWelcome);
+      
+      if (welcomeModal) {
+        // If already seen welcome, skip modal and show app
+        if (hasSeenWelcome) {
+          console.log('Welcome skipped - showing app (user has seen before)');
+          welcomeModal.style.display = 'none';
+          // Show all app containers and header
+          document.querySelectorAll('.container').forEach(el => el.style.display = 'block');
+          document.querySelectorAll('.main-wrapper').forEach(el => el.style.display = 'flex');
+          document.querySelectorAll('[style*="position: sticky"]').forEach(el => el.style.display = 'flex');
+          // Update button visibility based on activation
+          updateActivationStatus();
+        } else {
+          // First time user - show welcome
+          console.log('Welcome shown - first time user (no kmqr_welcome_shown in storage)');
+          welcomeModal.style.display = 'block';
+          // Hide app containers during welcome
+          document.querySelectorAll('.container').forEach(el => el.style.display = 'none');
+          document.querySelectorAll('.main-wrapper').forEach(el => el.style.display = 'none');
+          document.querySelectorAll('[style*="position: sticky"]').forEach(el => el.style.display = 'none');
+        }
+      }
+      
+      // Hide loading screen after 500ms
+      setTimeout(() => {
+        const loadingScreen = document.getElementById('loadingScreen');
+        if (loadingScreen) {
+          loadingScreen.classList.add('hidden');
+        }
+      }, 500);
+      
+      // Check for updates
+      checkForUpdates();
+    }
+
+    // ========== UPDATE CHECK SYSTEM ==========
+    const LATEST_VERSION = '1.0.8'; // Update this when releasing new version
+    
+    function checkForUpdates() {
+      const currentVersion = localStorage.getItem('kmqr_version_loaded') || KMQR_VERSION;
+      
+      // Store last checked time
+      const lastChecked = localStorage.getItem('kmqr_last_update_check');
+      const now = Date.now();
+      
+      // Check every 6 hours or on first load
+      if (!lastChecked || (now - parseInt(lastChecked)) > 6 * 60 * 60 * 1000) {
+        localStorage.setItem('kmqr_last_update_check', now.toString());
+        
+        // Compare versions
+        if (LATEST_VERSION !== currentVersion) {
+          showUpdateBanner();
+        }
+      }
+    }
+    
+    function showUpdateBanner() {
+      const banner = document.getElementById('updateBanner');
+      const updateBtn = document.getElementById('updateCheckBtn');
+      if (banner) banner.style.display = 'block';
+      if (updateBtn) updateBtn.style.display = 'block';
+    }
+    
+    function performUpdate() {
+      // Clear cache and reload
+      localStorage.setItem('kmqr_version_loaded', LATEST_VERSION);
+      window.location.href = window.location.href.split('?')[0] + '?v=' + LATEST_VERSION + '&t=' + Date.now();
+    }
+
+    // Run initialization immediately
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeWelcome);
+    } else {
+      initializeWelcome();
+    }
+
+    // Also accept license button handler
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('DOMContentLoaded fired - all buttons should be ready');
+      updateActivationStatus();
+      
+      // Attach update button handler
+      const updateNowBtn = document.getElementById('updateNowBtn');
+      const updateCheckBtn = document.getElementById('updateCheckBtn');
+      if (updateNowBtn) {
+        updateNowBtn.onclick = performUpdate;
+      }
+      if (updateCheckBtn) {
+        updateCheckBtn.onclick = performUpdate;
+      }
+    });
+    
+    
+    function updateActivationStatus() {
+      const isActivated = localStorage.getItem('kmqr_app_activated') === 'true';
+      const statusDiv = document.getElementById('activationStatus');
+      const activateBtn = document.getElementById('activateBtn');
+      
+      if (isActivated) {
+        if (statusDiv) statusDiv.style.display = 'block';
+        // Show deactivate button (red/orange style)
+        if (activateBtn) {
+          activateBtn.textContent = '🔒 Deactivate';
+          activateBtn.style.display = 'block';
+          activateBtn.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+          activateBtn.style.backgroundImage = 'linear-gradient(135deg, #ef4444, #dc2626)';
+          activateBtn.style.cursor = 'pointer';
+          activateBtn.style.opacity = '1';
+          activateBtn.style.boxShadow = '0 2px 6px rgba(239,68,68,0.25)';
+          activateBtn.onclick = function() {
+            // Confirm deactivation
+            if (confirm('Are you sure you want to deactivate? You will need to enter a license code again.')) {
+              // Clear license and activation
+              localStorage.removeItem('kmqr_app_activated');
+              localStorage.removeItem('kmqr_license_code');
+              localStorage.removeItem('kmqr_welcome_shown');
+              
+              // Close any open modals
+              document.querySelectorAll('.modal.active').forEach(modal => {
+                modal.classList.remove('active');
+                modal.style.display = 'none';
+              });
+              
+              // Show welcome screen
+              const welcomeModal = document.getElementById('welcomeModal');
+              if (welcomeModal) {
+                welcomeModal.style.display = 'block';
+              }
+              
+              // Hide app
+              document.querySelectorAll('.container').forEach(el => el.style.display = 'none');
+              document.querySelectorAll('.main-wrapper').forEach(el => el.style.display = 'none');
+              document.querySelectorAll('[style*="position: sticky"]').forEach(el => el.style.display = 'none');
+              
+              // Update button
+              updateActivationStatus();
+            }
+          };
+        }
+      } else {
+        if (statusDiv) statusDiv.style.display = 'none';
+        // Show activate button (green style)
+        if (activateBtn) {
+          activateBtn.textContent = '🔓 Activate';
+          activateBtn.style.display = 'block';
+          activateBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+          activateBtn.style.backgroundImage = 'linear-gradient(135deg, #10b981, #059669)';
+          activateBtn.style.cursor = 'pointer';
+          activateBtn.style.opacity = '1';
+          activateBtn.style.boxShadow = '0 2px 6px rgba(16,185,129,0.25)';
+          activateBtn.onclick = function() {
+            document.getElementById('licenseModal').classList.add('active');
+            document.getElementById('licenseModal').style.display = 'flex';
+          };
+        }
+      }
+    }
+
+    // ========== QR CODE GENERATOR ==========
+    // Translations
+    const translations = {
+      en: {
+        title: 'KMQR Generator',
+        textLabel: 'Text or URL',
+        textPlaceholder: 'Enter text, URL, or Khmer...',
+        sizeLabel: 'Size',
+        ecLabel: 'Error Correction',
+        ecLow: 'Low',
+        ecMedium: 'Medium',
+        ecQuartile: 'Quartile',
+        ecHigh: 'High',
+        dpiLabel: 'Quality (DPI)',
+        roundLabel: 'Round Logo',
+        yes: 'Yes',
+        no: 'No',
+        fgLabel: 'Foreground',
+        bgLabel: 'Background',
+        logoBgLabel: 'Logo BG',
+        captionLabel: 'Overlay Text',
+        captionPlaceholder: 'e.g. KHEM MY',
+        logoLabel: 'Choose Logo',
+        btnGenerate: 'Generate QR',
+        btnDownload: '📥 Download',
+        btnClear: 'Clear',
+        btnHelp: 'Help',
+        btnAbout: 'About',
+        btnShare: '📤 Share',
+        updateBtn: '🔄 Update',
+        previewHint: 'Enter text and click Generate',
+        helpTitle: 'Help - KMQR Generator Pro',
+        helpContent: '<p><strong>📖 How to Use:</strong></p><p>1. Enter text or URL in the input field<br>2. Customize size, colors, error correction<br>3. Add logo (optional)<br>4. Click "Generate QR" to create the code<br>5. Download as PNG, JPG, or PDF</p><hr style="margin: 16px 0; border: none; border-top: 1px solid #475569;"><p><strong>✨ Features:</strong><br>• Offline QR code generation<br>• Logo overlay with customizable background<br>• High-quality DPI export (1x, 2x, 3x)<br>• English & Khmer bilingual support<br>• Trial Mode & License Activation<br>• Social media sharing</p><hr style="margin: 16px 0; border: none; border-top: 1px solid #475569;"><p><strong>🔓 Get License:</strong><br>📧 <a href="mailto:my.khem.mathst@gmail.com" style="color: #3b82f6;">my.khem.mathst@gmail.com</a><br>📱 <a href="tel:+85566999313199" style="color: #3b82f6;">+855 66/99 931319</a><br>💬 <a href="https://t.me/khemmy99" target="_blank" style="color: #3b82f6;">Telegram: @khemmy99</a></p>',
+        aboutTitle: 'About KMQR Generator Pro',
+        aboutContent: '<p style="text-align: center; margin-bottom: 20px;"><strong style="font-size: 18px; color: #10b981;">KMQR Generator</strong><br><strong>Version 1.0.7</strong><br><em style="color: #94a3b8;">Professional Edition</em></p><hr style="margin: 16px 0; border: none; border-top: 1px solid #475569;"><p><strong>👨‍💻 Developer:</strong><br>Khem My<br><em>Full-Stack Web Developer</em><br><em>QR Code Specialist</em></p><hr style="margin: 16px 0; border: none; border-top: 1px solid #475569;"><p><strong>📧 Contact Information:</strong><br>Email: <a href="mailto:my.khem.mathst@gmail.com" style="color: #3b82f6;">my.khem.mathst@gmail.com</a><br>Phone: <a href="tel:+85566999313199" style="color: #3b82f6;">+855 66/99 931319</a><br>Facebook: <a href="https://facebook.com/KMLOL" target="_blank" style="color: #3b82f6;">facebook.com/KMLOL</a><br>Telegram: <a href="https://t.me/khemmy99" target="_blank" style="color: #3b82f6;">@khemmy99</a></p><hr style="margin: 16px 0; border: none; border-top: 1px solid #475569;"><p><strong>© Copyright</strong><br>© 2024-2026 Khem My. All rights reserved.<br><em style="color: #94a3b8; font-size: 12px;">KMQR Generator is provided as-is for professional QR code generation.</em></p>'
+      },
+      km: {
+        title: 'កម្មវិធីបង្កើត QR',
+        textLabel: 'អត្ថបទ ឬ URL',
+        textPlaceholder: 'បញ្ចូលអត្ថបទ, URL, ឬភាសាខ្មែរ…',
+        sizeLabel: 'ទំហំ',
+        ecLabel: 'កម្រិតកែកំហុស',
+        ecLow: 'ទាប',
+        ecMedium: 'មធ្យម',
+        ecQuartile: 'ខ្ពស់',
+        ecHigh: 'ខ្ពស់បំផុត',
+        dpiLabel: 'គុណភាព (DPI)',
+        roundLabel: 'រូបសញ្ញាមូល',
+        yes: 'បាទ/ចាស',
+        no: 'ទេ',
+        fgLabel: 'ពណ៌មុខ',
+        bgLabel: 'ពណ៌ខាងក្រោយ',
+        logoBgLabel: 'ពណ៌ខាងក្រោយរូបសញ្ញា',
+        captionLabel: 'អត្ថបទលើកូដ',
+        captionPlaceholder: 'ឧ. ខែម​ មី',
+        logoLabel: 'ជ្រើសរើសរូបភាព',
+        btnGenerate: 'បង្កើតកូដ QR',
+        btnDownload: '📥 ទាញយក',
+        btnClear: 'សម្អាត',
+        btnHelp: 'ជំនួយ',
+        btnAbout: 'អំពីកម្មវិធី',
+        btnShare: '📤 ចែករំលែក',
+        updateBtn: '🔄 កំណែកម្មវិធី',
+        previewHint: 'បញ្ចូលអត្ថបទ ហើយចុចបង្កើត',
+        helpTitle: 'ជំនួយ - KMQR Generator Pro',
+        helpContent: '<p><strong>📖 របៀបប្រើប្រាស់៖</strong></p><p>១. បញ្ចូលអត្ថបទ ឬ URL នៅក្នុងវាលបញ្ចូល<br>២. កែលម្អទំហំ ពណ៌ និងកម្រិតកែកំហុស<br>៣. បន្ថែមរូបសញ្ញា (ស្ នៃចាប់ផ្តើម)<br>៤. ចុច "បង្កើតកូដ QR" ដើម្បីបង្កើតលេខកូដ<br>៥. ទាញយកជា PNG, JPG ឬ PDF</p><hr style="margin: 16px 0; border: none; border-top: 1px solid #475569;"><p><strong>✨ លក្ខណៈពិសេស៖</strong><br>• បង្កើតលេខកូដ QR ដោយគ្មាននឹងលើបណ្តាញ<br>• រូបសញ្ញាលើស្រទាប់ដែលបានលម្អ<br>• នាំចេញគុណភាពខ្ពស់ DPI (1x, 2x, 3x)<br>• គាំទបទ្វេភាសា (អង់គ្លេស & ខ្មែរ)<br>• ម៉ូដលំរាយការណ៍ និងសកម្មកម្មវិធី<br>• ចែករំលែកលើមេឌៀ</p><hr style="margin: 16px 0; border: none; border-top: 1px solid #475569;"><p><strong>🔓 ទទួលលីសង្សឹក៖</strong><br>📧 <a href="mailto:my.khem.mathst@gmail.com" style="color: #3b82f6;">my.khem.mathst@gmail.com</a><br>📱 <a href="tel:+85566999313199" style="color: #3b82f6;">+855 66/99 931319</a><br>💬 <a href="https://t.me/khemmy99" target="_blank" style="color: #3b82f6;">Telegram: @khemmy99</a></p>',
+        aboutTitle: 'អំពី KMQR Generator Pro',
+        aboutContent: '<p style="text-align: center; margin-bottom: 20px;"><strong style="font-size: 18px; color: #10b981;">KMQR Generator</strong><br><strong>ជំនាន់ ១.០.៦</strong><br><em style="color: #94a3b8;">ក្រុម​វិជ្ជាជីវៈ</em></p><hr style="margin: 16px 0; border: none; border-top: 1px solid #475569;"><p><strong>👨‍💻 អ្នកបង្កើត៖</strong><br>ខែម​ មី<br><em>អ្នកអភិវឌ្ឍគេហទំព័រពេញលេញ</em><br><em>ឯកទេស QR Code</em></p><hr style="margin: 16px 0; border: none; border-top: 1px solid #475569;"><p><strong>📧 ព័ត៌មាននាក់ទាក់ទង៖</strong><br>អ៊ីមែល៖ <a href="mailto:my.khem.mathst@gmail.com" style="color: #3b82f6;">my.khem.mathst@gmail.com</a><br>ទូរស័ព្ទ៖ <a href="tel:+85566999313199" style="color: #3b82f6;">+855 66/99 931319</a><br>Facebook៖ <a href="https://facebook.com/KMLOL" target="_blank" style="color: #3b82f6;">facebook.com/KMLOL</a><br>Telegram៖ <a href="https://t.me/khemmy99" target="_blank" style="color: #3b82f6;">@khemmy99</a></p><hr style="margin: 16px 0; border: none; border-top: 1px solid #475569;"><p><strong>© រក្សាសិទ្ធិ</strong><br>© ២០២៤-២០២៦ ខែម​ មី។ រក្សាសិទ្ធិគ្រប់យ៉ាង។<br><em style="color: #94a3b8; font-size: 12px;">KMQR Generator ផ្តល់ជូនក្នុងលក្ខណ្ឌដូចដែលជាសម្រាប់ការបង្កើតលេខកូដ QR។</em></p>'
+      }
+    };
+
+    let currentLang = localStorage.getItem('kmqr_lang') || 'km';
+
+    // Initialize button text based on current language
+    const initLangBtn = document.getElementById('langToggle');
+    if (initLangBtn) {
+      initLangBtn.textContent = currentLang === 'en' ? '🌐 ខ្មែរ' : '🌐 English';
+    }
+
+    function updateLanguage(lang) {
+      currentLang = lang;
+      localStorage.setItem('kmqr_lang', lang);
+      const t = translations[lang];
+      
+      document.getElementById('title').textContent = t.title;
+      document.getElementById('textLabel').textContent = t.textLabel;
+      document.getElementById('qrText').placeholder = t.textPlaceholder;
+      document.getElementById('sizeLabel').textContent = t.sizeLabel;
+      document.getElementById('ecLabel').textContent = t.ecLabel;
+      document.getElementById('ecLow').textContent = t.ecLow;
+      document.getElementById('ecMedium').textContent = t.ecMedium;
+      document.getElementById('ecQuartile').textContent = t.ecQuartile;
+      document.getElementById('ecHigh').textContent = t.ecHigh;
+      document.getElementById('dpiLabel').textContent = t.dpiLabel;
+      document.getElementById('roundLabel').textContent = t.roundLabel;
+      document.getElementById('yes').textContent = t.yes;
+      document.getElementById('no').textContent = t.no;
+      document.getElementById('fgLabel').textContent = t.fgLabel;
+      document.getElementById('bgLabel').textContent = t.bgLabel;
+      document.getElementById('logoBgLabel').textContent = t.logoBgLabel;
+      document.getElementById('captionLabel').textContent = t.captionLabel;
+      document.getElementById('overlayText').placeholder = t.captionPlaceholder;
+      document.getElementById('logoLabel').textContent = t.logoLabel;
+      document.getElementById('btnGenerate').textContent = t.btnGenerate;
+      document.getElementById('btnDownload').textContent = t.btnDownload;
+      document.getElementById('btnClear').textContent = t.btnClear;
+      document.getElementById('btnHelp').textContent = t.btnHelp;
+      document.getElementById('btnAbout').textContent = t.btnAbout;
+      if (document.getElementById('btnShare')) document.getElementById('btnShare').textContent = t.btnShare;
+      if (document.getElementById('updateCheckBtn')) document.getElementById('updateCheckBtn').textContent = t.updateBtn || '🔄 Update';
+      document.getElementById('previewHint').textContent = t.previewHint;
+      document.getElementById('helpTitle').textContent = t.helpTitle;
+      document.getElementById('helpContent').innerHTML = t.helpContent;
+      document.getElementById('aboutTitle').textContent = t.aboutTitle;
+      document.getElementById('aboutContent').innerHTML = t.aboutContent;
+      
+      // Update language and button text
+      currentLang = lang;
+      const btnToggle = document.getElementById('langToggle');
+      if (btnToggle) {
+        btnToggle.textContent = lang === 'en' ? '🌐 ខ្មែរ' : '🌐 English';
+      }
+      
+      // Apply Khmer font styling to modals when Khmer is selected
+      const helpContent = document.getElementById('helpContent');
+      const aboutContent = document.getElementById('aboutContent');
+      if (lang === 'km') {
+        helpContent.style.fontFamily = "'Hanuman', 'Khmer OS', 'Siemreap', sans-serif";
+        helpContent.style.fontSize = '16px';
+        aboutContent.style.fontFamily = "'Hanuman', 'Khmer OS', 'Siemreap', sans-serif";
+        aboutContent.style.fontSize = '16px';
+      } else {
+        helpContent.style.fontFamily = 'inherit';
+        helpContent.style.fontSize = 'inherit';
+        aboutContent.style.fontFamily = 'inherit';
+        aboutContent.style.fontSize = 'inherit';
+      }
+      // Do not update langToggle button text here; only update in the event handler
+    }
+
+    // Language toggle button
+    const langToggleBtn = document.getElementById('langToggle');
+    if (langToggleBtn) {
+      langToggleBtn.addEventListener('click', () => {
+        const newLang = currentLang === 'en' ? 'km' : 'en';
+        currentLang = newLang;
+        localStorage.setItem('kmqr_lang', newLang);
+        // Update button text immediately
+        langToggleBtn.textContent = newLang === 'en' ? '🌐 ខ្មែរ' : '🌐 English';
+        // Update all language content
+        updateLanguage(newLang);
+      });
+    }
+
+    // DOM Elements
+    const elText = document.getElementById('qrText');
+    const elSize = document.getElementById('qrSize');
+    const elEC = document.getElementById('qrEC');
+    const elFG = document.getElementById('qrFG');
+    const elBG = document.getElementById('qrBG');
+    const elDpi = document.getElementById('dpiScale');
+    const elLogoBg = document.getElementById('logoBg');
+    const elLogoRound = document.getElementById('logoRound');
+    const elOverlay = document.getElementById('overlayText');
+    const elLogoUpload = document.getElementById('logoUpload');
+    const logoUploadBtn = document.getElementById('logoUploadBtn');
+    const logoPreview = document.getElementById('logoPreview');
+    const btnGenerate = document.getElementById('btnGenerate');
+    const btnDownload = document.getElementById('btnDownload');
+    const btnClear = document.getElementById('btnClear');
+    const btnHelp = document.getElementById('btnHelp');
+    const btnAbout = document.getElementById('btnAbout');
+    const qrPreview = document.getElementById('qrPreview');
+
+    // Logo file change
+    elLogoUpload.addEventListener('change', (e) => {
+      if (e.target.files && e.target.files[0]) {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        
+        reader.onload = (event) => {
+          logoImage = new Image();
+          logoImage.onload = () => {
+            // Show preview
+            logoPreview.innerHTML = '<img src="' + event.target.result + '" alt="Logo"/><p>Logo selected</p>';
+            logoPreview.style.display = 'block';
+            console.log('Logo loaded successfully');
+          };
+          logoImage.onerror = () => {
+            alert('Failed to load logo image. Try a different file.');
+            logoImage = null;
+            logoPreview.style.display = 'none';
+            elLogoUpload.value = '';
+          };
+          logoImage.src = event.target.result;
+        };
+        
+        reader.onerror = () => {
+          alert('Failed to read file');
+        };
+        
+        reader.readAsDataURL(file);
+      }
+    });
+
+    // Generate QR Code
+    btnGenerate.addEventListener('click', () => {
+      console.log('Generate button clicked!');
+      if (!elText.value) {
+        alert('Please enter text or URL');
+        return;
+      }
+
+      try {
+        qrPreview.innerHTML = '';
+        const size = parseInt(elSize.value);
+        const dpi = parseInt(elDpi.value);
+
+        // Create temporary container for QRCode library
+        const tempDiv = document.createElement('div');
+        tempDiv.style.display = 'none';
+        tempDiv.id = 'qr-temp-' + Date.now();
+        document.body.appendChild(tempDiv);
+
+        // Generate QR code
+        const qrInstance = new QRCode(tempDiv, {
+          text: elText.value,
+          width: size,
+          height: size,
+          colorDark: elFG.value,
+          colorLight: elBG.value,
+          correctLevel: QRCode.CorrectLevel[elEC.value]
+        });
+
+        // Wait for canvas to be created
+        setTimeout(() => {
+          try {
+            const qrCanvas = tempDiv.querySelector('canvas');
+            if (!qrCanvas) {
+              throw new Error('Failed to generate QR code');
+            }
+
+            // Create preview canvas
+            const previewCanvas = document.createElement('canvas');
+            const captionHeight = elOverlay.value ? Math.floor(size / 6) : 0;
+            previewCanvas.width = size;
+            previewCanvas.height = size + captionHeight;
+            const ctxPreview = previewCanvas.getContext('2d');
+
+            // Draw background
+            ctxPreview.fillStyle = elBG.value;
+            ctxPreview.fillRect(0, 0, previewCanvas.width, previewCanvas.height);
+            ctxPreview.imageSmoothingEnabled = false;
+
+            // Draw QR code
+            ctxPreview.drawImage(qrCanvas, 0, 0, size, size);
+
+            // Draw logo if exists
+            if (logoImage) {
+              const logoSize = Math.floor(size * 0.25);
+              const x = (size - logoSize) / 2;
+              const y = (size - logoSize) / 2;
+              ctxPreview.fillStyle = elLogoBg.value;
+
+              if (elLogoRound.value === 'yes') {
+                ctxPreview.beginPath();
+                ctxPreview.arc(x + logoSize / 2, y + logoSize / 2, logoSize / 2, 0, Math.PI * 2);
+                ctxPreview.fill();
+              } else {
+                ctxPreview.fillRect(x, y, logoSize, logoSize);
+              }
+
+              ctxPreview.imageSmoothingEnabled = true;
+              ctxPreview.drawImage(logoImage, x, y, logoSize, logoSize);
+              ctxPreview.imageSmoothingEnabled = false;
+            }
+
+            // Draw caption if exists
+            if (elOverlay.value) {
+              ctxPreview.fillStyle = '#ffffff';
+              ctxPreview.fillRect(0, size, size, captionHeight);
+              ctxPreview.fillStyle = elFG.value;
+              ctxPreview.font = Math.floor(captionHeight * 0.6) + 'px Arial';
+              ctxPreview.textAlign = 'center';
+              ctxPreview.textBaseline = 'middle';
+              ctxPreview.fillText(elOverlay.value, size / 2, size + captionHeight / 2);
+            }
+
+            // Display preview
+            qrPreview.innerHTML = '';
+            qrPreview.appendChild(previewCanvas);
+
+            // Create export canvas for high-quality download
+            const exportCanvasEl = document.createElement('canvas');
+            exportCanvasEl.width = size * dpi;
+            const captionHeightExport = elOverlay.value ? Math.floor(size * dpi / 6) : 0;
+            exportCanvasEl.height = size * dpi + captionHeightExport;
+            const ctx = exportCanvasEl.getContext('2d');
+
+            // Draw on export canvas
+            ctx.fillStyle = elBG.value;
+            ctx.fillRect(0, 0, exportCanvasEl.width, exportCanvasEl.height);
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(qrCanvas, 0, 0, size, size, 0, 0, size * dpi, size * dpi);
+
+            if (logoImage) {
+              const logoSize = Math.floor(size * 0.25) * dpi;
+              const x = Math.floor((size * dpi - logoSize) / 2);
+              const y = Math.floor((size * dpi - logoSize) / 2);
+              ctx.fillStyle = elLogoBg.value;
+
+              if (elLogoRound.value === 'yes') {
+                ctx.beginPath();
+                ctx.arc(x + logoSize / 2, y + logoSize / 2, logoSize / 2, 0, Math.PI * 2);
+                ctx.fill();
+              } else {
+                ctx.fillRect(x, y, logoSize, logoSize);
+              }
+
+              ctx.imageSmoothingEnabled = true;
+              ctx.drawImage(logoImage, x, y, logoSize, logoSize);
+              ctx.imageSmoothingEnabled = false;
+            }
+
+            if (elOverlay.value) {
+              ctx.fillStyle = '#ffffff';
+              ctx.fillRect(0, size * dpi, size * dpi, captionHeightExport);
+              ctx.fillStyle = elFG.value;
+              ctx.font = Math.floor(captionHeightExport * 0.6) + 'px Arial';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillText(elOverlay.value, size * dpi / 2, size * dpi + captionHeightExport / 2);
+            }
+
+            exportCanvas = exportCanvasEl;
+            btnDownload.disabled = false;
+            btnShare.disabled = false;
+            document.body.removeChild(tempDiv);
+          } catch (err) {
+            console.error('Error:', err);
+            alert('Error: ' + err.message);
+            if (document.body.contains(tempDiv)) {
+              document.body.removeChild(tempDiv);
+            }
+          }
+        }, 100);
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    });
+    // Download QR Code
+    const btnShare = document.getElementById('btnShare');
+    const downloadMenu = document.getElementById('downloadMenu');
+    const shareMenu = document.getElementById('shareMenu');
+
+    // Download format functions
+    window.downloadCanvas = function(format) {
+      if (!exportCanvas) return;
+      
+      const isActivated = localStorage.getItem('kmqr_app_activated') === 'true';
+      if (!isActivated) {
+        alert('🔒 Download is locked in Trial Mode\n\nClick the GREEN ACTIVATE button to unlock all downloads!');
+        return;
+      }
+      
+      if (format === 'png') {
+        const link = document.createElement('a');
+        link.download = 'KMQR-' + Date.now() + '.png';
+        link.href = exportCanvas.toDataURL('image/png');
+        link.click();
+      } else if (format === 'jpg') {
+        const link = document.createElement('a');
+        link.download = 'KMQR-' + Date.now() + '.jpg';
+        link.href = exportCanvas.toDataURL('image/jpeg', 0.95);
+        link.click();
+      } else if (format === 'pdf') {
+        downloadAsPDF();
+      }
+      const downloadMenu = document.getElementById('downloadMenu');
+      if (downloadMenu) downloadMenu.style.display = 'none';
+    };
+
+    window.downloadAsPDF = function() {
+      try {
+        var canvas = exportCanvas;
+        if (!canvas) {
+          alert('Please generate a QR code first');
+          return;
+        }
+        
+        // Convert canvas to PNG image data
+        var imgData = canvas.toDataURL('image/png');
+        
+        // Open in new browser tab/window so user can save as PDF
+        var newWindow = window.open();
+        if (newWindow) {
+          newWindow.document.write('<html><body style="margin:0; padding:20px; background:#f0f0f0; text-align:center;">');
+          newWindow.document.write('<h2 style="color:#333;">KMQR Generator - QR Code</h2>');
+          newWindow.document.write('<img src="' + imgData + '" style="max-width:600px; max-height:600px; border:2px solid #333; padding:20px; background:white; margin:20px auto; display:block; border-radius:8px;">');
+          newWindow.document.write('<p style="color:#666; margin-top:20px;">Right-click image to save, or use Ctrl+P to print as PDF</p>');
+          newWindow.document.write('<p style="color:#999; font-size:12px;">Tip: When printing, select "Save as PDF" from printer dropdown</p>');
+          newWindow.document.write('</body></html>');
+          newWindow.document.close();
+          newWindow.document.title = 'KMQR-' + Date.now() + '.pdf';
+        } else {
+          alert('Could not open new window. Check browser popup settings.');
+        }
+      } catch (err) {
+        console.error('PDF export error:', err);
+        alert('Error: ' + err.message);
+      }
+    };
+
+    document.getElementById('downloadPNG').addEventListener('click', () => downloadCanvas('png'));
+    document.getElementById('downloadJPG').addEventListener('click', () => downloadCanvas('jpg'));
+    document.getElementById('downloadPDF').addEventListener('click', () => downloadCanvas('pdf'));
+
+    // Social sharing functions
+    function getQRDataURL() {
+      return exportCanvas ? exportCanvas.toDataURL('image/png') : null;
+    }
+
+    window.shareToSocial = function(platform) {
+      const elText = document.getElementById('qrText');
+      const shareMenu = document.getElementById('shareMenu');
+      
+      if (!elText.value) {
+        alert('Please generate a QR code first');
+        return;
+      }
+
+      const text = encodeURIComponent('Check out my QR code created with KMQR Generator: ' + elText.value);
+      const url = 'https://kmqr.com'; // Your website
+      
+      let shareUrl = '';
+      
+      switch(platform) {
+        case 'whatsapp':
+          shareUrl = 'https://wa.me/?text=' + text;
+          break;
+        case 'facebook':
+          shareUrl = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url) + '&quote=' + text;
+          break;
+        case 'twitter':
+          shareUrl = 'https://twitter.com/intent/tweet?text=' + text + '&url=' + encodeURIComponent(url);
+          break;
+        case 'telegram':
+          shareUrl = 'https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + text;
+          break;
+        case 'email':
+          window.location.href = 'mailto:?subject=Check My QR Code&body=' + encodeURIComponent('QR Text: ' + elText.value + '\n\nCreated with KMQR Generator\nhttps://facebook.com/KMLOL');
+          if (shareMenu) shareMenu.style.display = 'none';
+          return;
+        case 'copy':
+          navigator.clipboard.writeText(elText.value).then(() => {
+            alert('QR code data copied to clipboard!');
+          }).catch(() => {
+            alert('Could not copy to clipboard');
+          });
+          if (shareMenu) shareMenu.style.display = 'none';
+          return;
+      }
+      
+      if (shareUrl) {
+        window.open(shareUrl, '_blank');
+        if (shareMenu) shareMenu.style.display = 'none';
+      }
+    };
+
+    document.getElementById('shareWhatsApp').addEventListener('click', () => shareToSocial('whatsapp'));
+    document.getElementById('shareFacebook').addEventListener('click', () => shareToSocial('facebook'));
+    document.getElementById('shareTwitter').addEventListener('click', () => shareToSocial('twitter'));
+    document.getElementById('shareTelegram').addEventListener('click', () => shareToSocial('telegram'));
+    document.getElementById('shareEmail').addEventListener('click', () => shareToSocial('email'));
+    document.getElementById('shareCopy').addEventListener('click', () => shareToSocial('copy'));
+
+    // Clear all
+    btnClear.addEventListener('click', () => {
+      qrPreview.innerHTML = '<p id="previewHint">' + translations[currentLang].previewHint + '</p>';
+      elText.value = '';
+      elOverlay.value = '';
+      elLogoUpload.value = '';
+      logoImage = null;
+      logoPreview.style.display = 'none';
+      exportCanvas = null;
+      btnDownload.disabled = true;
+      btnShare.disabled = true;
+      downloadMenu.style.display = 'none';
+      shareMenu.style.display = 'none';
+    });
+
+    // Help and About modals
+    btnHelp.addEventListener('click', () => {
+      document.getElementById('helpModal').classList.add('active');
+    });
+
+    btnAbout.addEventListener('click', () => {
+      document.getElementById('aboutModal').classList.add('active');
+    });
+
+    window.closeModal = function(id) {
+      const modal = document.getElementById(id);
+      if (modal) {
+        modal.classList.remove('active');
+        modal.style.display = 'none';
+      }
+    };
+
+    // Close modals on background click
+    document.querySelectorAll('.modal').forEach(modal => {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.classList.remove('active');
+          modal.style.display = 'none';
+        }
+      });
+    });
+
+    // Close modals on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal.active').forEach(modal => {
+          modal.classList.remove('active');
+          modal.style.display = 'none';
+        });
+      }
+    });
+
+    // Close menus when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('#btnDownload') && !e.target.closest('#downloadMenu')) {
+        const downloadMenu = document.getElementById('downloadMenu');
+        if (downloadMenu) downloadMenu.style.display = 'none';
+      }
+      if (!e.target.closest('#btnShare') && !e.target.closest('#shareMenu')) {
+        const shareMenu = document.getElementById('shareMenu');
+        if (shareMenu) shareMenu.style.display = 'none';
+      }
+    });
+
+    // Initialize
+    updateLanguage(currentLang);
+    initializeLicense();
+    initializeWelcome();
+    updateActivationStatus();
+  </script>
+</body>
+</html>
