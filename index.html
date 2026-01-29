@@ -1,3 +1,11 @@
+  <!-- Update Info Modal -->
+  <div id="updateInfoModal" class="modal">
+    <div class="modal-content" style="max-width: 380px; text-align: center;">
+      <button class="close-btn" onclick="document.getElementById('updateInfoModal').classList.remove('active'); document.getElementById('updateInfoModal').style.display = 'none';" style="position: absolute; top: 18px; right: 18px; font-size: 36px; color: #94a3b8; background: none; border: none; cursor: pointer;">&times;</button>
+      <h2 style="color: #f59e0b; font-size: 22px; font-weight: 700; margin: 0 0 18px 0;">Update Info</h2>
+      <div id="updateInfoContent" style="font-size:16px;line-height:1.7;color:#e2e8f0;"></div>
+    </div>
+  </div>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,7 +14,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>KMQR Generator - QR Code Creator</title>
+  <title>KMQR Generator</title>
   <link rel="icon" type="image/png" href="icon.png">
   <link rel="shortcut icon" href="icon.png" type="image/png">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -17,6 +25,11 @@
     const KMQR_VERSION = '1.0.8';
     const versionKey = 'kmqr_version_loaded';
     const storedVersion = localStorage.getItem(versionKey);
+    
+    // Initialize language FIRST before any handlers
+    let currentLang = localStorage.getItem('kmqr_lang') || 'km';
+    
+    // Version check logic continues...
     
     if (storedVersion !== KMQR_VERSION) {
       // NEW VERSION: Save activation state, clear old cache, update version
@@ -38,6 +51,12 @@
       window.location.href = window.location.href.split('?')[0] + '?v=' + KMQR_VERSION;
     }
     
+    // DEBUG: Always show main UI, bypass activation/welcome modals
+    window.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('.container').forEach(el => el.style.display = 'block');
+      if (document.getElementById('welcomeModal')) document.getElementById('welcomeModal').style.display = 'none';
+      if (document.getElementById('licenseModal')) document.getElementById('licenseModal').style.display = 'none';
+    });
     // Define handler functions EARLY so they're available for onclick handlers
     window.handleBtnEnterLicense = function() {
       console.log('handleBtnEnterLicense called');
@@ -57,18 +76,40 @@
       updateActivationStatus();
     };
     
+    // Generate or retrieve unique device ID (offline tracking)
+    function getDeviceId() {
+      let deviceId = localStorage.getItem('kmqr_device_id');
+      if (!deviceId) {
+        // Generate a simple UUID (RFC4122 v4 compliant)
+        deviceId = 'KM-' + ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+          (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+        );
+        localStorage.setItem('kmqr_device_id', deviceId);
+      }
+      return deviceId;
+    }
+
+    // Show device ID in license modal
+    function updateDeviceIdInfo() {
+      const deviceIdDiv = document.getElementById('deviceIdInfo');
+      if (deviceIdDiv) {
+        const t = translations[currentLang];
+        deviceIdDiv.innerHTML = '<span style="color:#f59e0b;font-size:13px;">' + t.deviceIdLabel + '</span><br><span style="font-family:monospace;font-size:15px;color:#3b82f6;">' + getDeviceId() + '</span>';
+      }
+    }
+
     window.handleBtnActivateLicense = function() {
       console.log('handleBtnActivateLicense called');
       const licenseInput = document.getElementById('licenseCodeInput');
       const licenseCode = licenseInput.value.trim();
       
       if (!licenseCode) {
-        alert('❌ Please enter a license code');
+        alert(translations[currentLang].alertEnterLicense);
         return;
       }
       
-      if (!licenseCode.startsWith('KMQR-') && !licenseCode.startsWith('TRIAL-')) {
-        alert('❌ Invalid license code format.\n\nValid codes start with KMQR- or TRIAL-\n\nExample: KMQR-ABC123');
+      if (!licenseCode.startsWith('KM-') && !licenseCode.startsWith('TRIAL-')) {
+        alert(translations[currentLang].alertInvalidLicense);
         return;
       }
       
@@ -85,82 +126,7 @@
       
       licenseInput.value = '';
       updateActivationStatus();
-    };
-    
-    // ========== DEVICE DETECTION ==========
-    window.detectDevice = function() {
-      const ua = navigator.userAgent.toLowerCase();
-      const platform = navigator.platform.toLowerCase();
-      
-      // Detect iOS (iPhone, iPad, iPod)
-      if (/iphone|ipad|ipod/.test(ua)) {
-        return 'ios';
-      }
-      
-      // Detect Android
-      if (/android/.test(ua)) {
-        return 'android';
-      }
-      
-      // Detect Windows
-      if (/win/.test(platform)) {
-        return 'windows';
-      }
-      
-      // Detect macOS
-      if (/mac/.test(platform)) {
-        return 'macos';
-      }
-      
-      // Detect Linux
-      if (/linux/.test(platform)) {
-        return 'linux';
-      }
-      
-      return 'unknown';
-    };
-    
-    window.showDeviceInfo = function() {
-      const device = detectDevice();
-      const deviceBanner = document.getElementById('deviceBanner');
-      const deviceText = document.getElementById('deviceText');
-      
-      if (!deviceBanner || !deviceText) return;
-      
-      let message = '';
-      let emoji = '';
-      
-      switch(device) {
-        case 'ios':
-          emoji = '📱';
-          message = 'iOS Device Detected - Add to Home Screen for offline access!';
-          break;
-        case 'android':
-          emoji = '📱';
-          message = 'Android Device Detected - Add to Home Screen for offline access!';
-          break;
-        case 'windows':
-          emoji = '💻';
-          message = 'Windows PC Detected - Desktop experience ready!';
-          break;
-        case 'macos':
-          emoji = '🍎';
-          message = 'macOS Detected - Add to Dock for quick access!';
-          break;
-        case 'linux':
-          emoji = '🐧';
-          message = 'Linux Detected - Desktop app ready!';
-          break;
-        default:
-          emoji = '🌐';
-          message = 'Web Browser Detected - Works on any device!';
-      }
-      
-      deviceText.innerHTML = `${emoji} ${message}`;
-      deviceBanner.style.display = 'flex';
-      
-      // Store device type
-      localStorage.setItem('kmqr_device_type', device);
+      updateDeviceIdInfo();
     };
     
     window.handleBtnCancelLicense = function() {
@@ -178,6 +144,7 @@
       licenseInput.value = '';
       
       updateActivationStatus();
+      updateDeviceIdInfo();
     };
   </script>
   <style>
@@ -268,7 +235,7 @@
 
     .main-wrapper {
       max-width: 1400px;
-      margin: 20px auto;
+      margin: 80px auto 20px auto;
       display: flex;
       gap: 24px;
       padding: 0 8px;
@@ -724,11 +691,6 @@
   </style>
 </head>
 <body onload="initializeWelcome()">
-  <!-- Device Detection Banner -->
-  <div id="deviceBanner" style="display: none; background: linear-gradient(135deg, #3b82f6, #2563eb); padding: 10px 16px; text-align: center; color: white; font-weight: 500; font-size: 13px; border-bottom: 1px solid #1e40af; box-shadow: 0 2px 8px rgba(0,0,0,0.2);">
-    <span id="deviceText"></span>
-  </div>
-  
   <!-- Update Notification Banner -->
   <div id="updateBanner" style="display: none; background: linear-gradient(135deg, #f59e0b, #d97706); padding: 12px 16px; text-align: center; color: white; font-weight: 600; font-size: 13px; border-bottom: 1px solid #b45309; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
     🔄 New version available! <button id="updateNowBtn" style="background: white; color: #d97706; border: none; padding: 4px 12px; border-radius: 3px; font-weight: 700; cursor: pointer; margin-left: 8px; font-size: 12px;">Update Now</button>
@@ -742,52 +704,46 @@
 
   <!-- Welcome Choice Screen - First Time Only -->
   <div id="welcomeModal" style="display: block; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #0f172a; z-index: 9999; padding: 40px 20px; text-align: center; overflow-y: auto;">
-    <h2 style="color: #3b82f6; margin: 0 0 12px 0; font-size: 28px;">🎉 Welcome to KMQR</h2>
-    <p style="color: #cbd5e1; margin: 0 0 30px 0; font-size: 14px;">Generate QR codes with professional features</p>
+    <h2 id="welcomeTitle" style="color: #3b82f6; margin: 0 0 12px 0; font-size: 28px;"></h2>
+    <p id="welcomeSubtitle" style="color: #cbd5e1; margin: 0 0 30px 0; font-size: 14px;"></p>
     
-    <button id="btnEnterLicense" type="button" onclick="try { handleBtnEnterLicense(); } catch(e) { console.error('Error:', e); alert('Error: ' + e.message); }" style="display: block; width: 95%; max-width: 350px; margin: 20px auto; padding: 24px; background: #10b981; color: white; border: 2px solid #10b981; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 18px; min-height: 60px; position: relative; z-index: 10000; pointer-events: auto;">✅ Enter License</button>
+    <button id="btnEnterLicense" type="button" onclick="try { handleBtnEnterLicense(); } catch(e) { console.error('Error:', e); alert('Error: ' + e.message); }" style="display: block; width: 95%; max-width: 350px; margin: 20px auto; padding: 24px; background: #10b981; color: white; border: 2px solid #10b981; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 18px; min-height: 60px; position: relative; z-index: 10000; pointer-events: auto;"></button>
     
-    <button id="btnSkipTrial" type="button" onclick="try { handleBtnSkipTrial(); } catch(e) { console.error('Error:', e); alert('Error: ' + e.message); }" style="display: block; width: 95%; max-width: 350px; margin: 15px auto; padding: 16px; background: transparent; color: #60a5fa; border: 2px solid #60a5fa; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; min-height: 50px; position: relative; z-index: 10000; pointer-events: auto;">⏭️ Try Free</button>
+    <button id="btnSkipTrial" type="button" onclick="try { handleBtnSkipTrial(); } catch(e) { console.error('Error:', e); alert('Error: ' + e.message); }" style="display: block; width: 95%; max-width: 350px; margin: 15px auto; padding: 16px; background: transparent; color: #60a5fa; border: 2px solid #60a5fa; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; min-height: 50px; position: relative; z-index: 10000; pointer-events: auto;"></button>
     
-    <p style="color: #64748b; font-size: 12px; margin-top: 20px;">Trial mode: Generate & customize QR codes freely<br>Full license: Unlock all download formats</p>
+    <p id="trialModeInfo" style="color: #64748b; font-size: 12px; margin-top: 20px;"></p>
   </div>
 
   <!-- License Code Activation Modal -->
   <div id="licenseModal" class="modal">
     <div class="modal-content" style="max-width: 450px;">
-      <h2 style="color: #10b981; text-align: center; margin-bottom: 20px;">🔓 Enter License Code</h2>
+      <h2 id="licenseModalTitle" style="color: #10b981; text-align: center; margin-bottom: 20px;">🔓 បញ្ចូលលេខកូដ</h2>
       
       <div style="background: #0f172a; padding: 16px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #334155;">
-        <p style="font-size: 13px; color: #cbd5e1; margin-bottom: 12px;">
-          <strong>Paste your license code below to unlock full features:</strong>
-        </p>
+        <div id="deviceIdInfo" style="margin-bottom: 10px; text-align: center;"></div>
+        <p id="licenseInstructions" style="font-size: 13px; color: #cbd5e1; margin-bottom: 12px;"><strong>បញ្ចូលលេខកូដរបស់អ្នកខាងក្រោមដើម្បីដោះសោមុខងារពេញលេញ៖</strong></p>
         
-        <input type="text" id="licenseCodeInput" placeholder="Enter your license code here..." style="width: 100%; padding: 12px; border: 1px solid #475569; border-radius: 6px; background: #1e293b; color: #e2e8f0; font-size: 14px; margin-bottom: 12px; font-family: monospace; touch-action: manipulation; pointer-events: auto;">
+        <input type="text" id="licenseCodeInput" placeholder="បញ្ចូលលេខកូដរបស់អ្នកនៅទីនេះ..." style="width: 100%; padding: 12px; border: 1px solid #475569; border-radius: 6px; background: #1e293b; color: #e2e8f0; font-size: 14px; margin-bottom: 12px; font-family: monospace; touch-action: manipulation; pointer-events: auto;">
         
-        <p style="font-size: 12px; color: #94a3b8; line-height: 1.6;">
-          📧 Don't have a license code?<br>
-          Contact: <strong>my.khem.mathst@gmail.com</strong><br>
-          📱 Phone: <strong>+855 66/99 931319</strong><br>
-          💬 Telegram: <strong>@khemmy99</strong>
-        </p>
+        <p id="licenseContactInfo" style="font-size: 12px; color: #94a3b8; line-height: 1.6;">📧 មិនមានលេខកូដទេ?<br>ទំនាក់ទំនង៖ <strong>my.khem.mathst@gmail.com</strong><br>📱 ទូរស័ព្ទ៖ <strong>+855 66/99 931319</strong><br>💬 Telegram៖ <strong>@khemmy99</strong></p>
       </div>
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-        <button id="btnActivateLicense" type="button" onclick="try { handleBtnActivateLicense(); } catch(e) { console.error('Error:', e); alert('Error: ' + e.message); }" style="padding: 14px; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; min-height: 50px; width: 100%; pointer-events: auto; touch-action: manipulation; -webkit-user-select: none; user-select: none;">✅ Activate</button>
-        <button id="btnCancelLicense" type="button" onclick="try { handleBtnCancelLicense(); } catch(e) { console.error('Error:', e); alert('Error: ' + e.message); }" style="padding: 14px; background: #64748b; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; min-height: 50px; width: 100%; pointer-events: auto; touch-action: manipulation; -webkit-user-select: none; user-select: none;">Cancel</button>
+        <button id="btnActivateLicense" type="button" onclick="try { handleBtnActivateLicense(); } catch(e) { console.error('Error:', e); alert('Error: ' + e.message); }" style="padding: 14px; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; min-height: 50px; width: 100%; pointer-events: auto; touch-action: manipulation; -webkit-user-select: none; user-select: none;">✅ ធ្វើឱ្យសកម្ម</button>
+        <button id="btnCancelLicense" type="button" onclick="try { handleBtnCancelLicense(); } catch(e) { console.error('Error:', e); alert('Error: ' + e.message); }" style="padding: 14px; background: #64748b; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; min-height: 50px; width: 100%; pointer-events: auto; touch-action: manipulation; -webkit-user-select: none; user-select: none;">បោះបង់</button>
       </div>
     </div>
   </div>
 
   <!-- Header with Title and Buttons -->
   <div style="background: #1e293b; border-bottom: 1px solid #334155; padding: 6px 10px; position: sticky; top: 0; z-index: 102; display: flex; justify-content: space-between; align-items: center; gap: 6px; flex-wrap: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
-    <h1 id="title" style="margin: 0; font-size: 20px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; white-space: nowrap; flex-shrink: 0; font-weight: 700; letter-spacing: 0.5px; line-height: 1; display: flex; align-items: center; height: 40px;">KMQR Generator</h1>
+    <h1 id="title" style="margin: 0; font-size: 20px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; white-space: nowrap; flex-shrink: 0; font-weight: 700; letter-spacing: 0.5px; line-height: 1; display: flex; align-items: center; height: 40px;">កម្មវិធីបង្កើត QR</h1>
     <div style="display: flex; gap: 4px; align-items: center; height: 40px;">
-      <button id="activateBtn" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 4px 4px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; box-shadow: 0 2px 6px rgba(16,185,129,0.25); min-height: 28px; display: flex; align-items: center; justify-content: center; line-height: 1;" onclick="document.getElementById('helpModal').classList.remove('active'); document.getElementById('helpModal').style.display = 'none'; document.getElementById('aboutModal').classList.remove('active'); document.getElementById('aboutModal').style.display = 'none'; document.getElementById('licenseModal').classList.add('active'); document.getElementById('licenseModal').style.display = 'flex';">🔓 Activate</button>
-      <button id="btnHelp2" style="background: #475569; color: #e2e8f0; border: 1px solid #64748b; padding: 4px 4px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; min-height: 28px; display: flex; align-items: center; justify-content: center; line-height: 1;" onclick="document.getElementById('helpModal').classList.add('active'); document.getElementById('helpModal').style.display = 'flex'; document.getElementById('aboutModal').classList.remove('active'); document.getElementById('aboutModal').style.display = 'none'; document.getElementById('licenseModal').classList.remove('active'); document.getElementById('licenseModal').style.display = 'none';">❓ Help</button>
-      <button id="btnAbout2" style="background: #475569; color: #e2e8f0; border: 1px solid #64748b; padding: 4px 4px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; min-height: 28px; display: flex; align-items: center; justify-content: center; line-height: 1;" onclick="document.getElementById('aboutModal').classList.add('active'); document.getElementById('aboutModal').style.display = 'flex'; document.getElementById('helpModal').classList.remove('active'); document.getElementById('helpModal').style.display = 'none'; document.getElementById('licenseModal').classList.remove('active'); document.getElementById('licenseModal').style.display = 'none';">ℹ️ About</button>
-      <button id="langToggle" style="background: #475569; color: #e2e8f0; border: 1px solid #64748b; padding: 4px 4px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; min-height: 28px; display: flex; align-items: center; justify-content: center; line-height: 1;">🌐 ខ្មែរ</button>
-      <button id="updateCheckBtn" style="background: #64748b; color: #e2e8f0; border: 1px solid #94a3b8; padding: 4px 4px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; min-height: 28px; display: flex; align-items: center; justify-content: center; line-height: 1;">🔄 Update</button>
+      <button id="activateBtn" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 4px 4px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; box-shadow: 0 2px 6px rgba(16,185,129,0.25); min-height: 28px; display: flex; align-items: center; justify-content: center; line-height: 1;" onclick="document.getElementById('helpModal').classList.remove('active'); document.getElementById('helpModal').style.display = 'none'; document.getElementById('aboutModal').classList.remove('active'); document.getElementById('aboutModal').style.display = 'none'; document.getElementById('licenseModal').classList.add('active'); document.getElementById('licenseModal').style.display = 'flex';">🔓 ធ្វើឱ្យសកម្ម</button>
+        <button id="btnHelp2" style="background: #475569; color: #e2e8f0; border: 1px solid #64748b; padding: 4px 4px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; min-height: 28px; display: flex; align-items: center; justify-content: center; line-height: 1;" onclick="document.getElementById('helpModal').classList.add('active'); document.getElementById('helpModal').style.display = 'flex'; document.getElementById('aboutModal').classList.remove('active'); document.getElementById('aboutModal').style.display = 'none'; document.getElementById('licenseModal').classList.remove('active'); document.getElementById('licenseModal').style.display = 'none';"><span style="display: flex; align-items: center; gap: 4px;"><img src="icon.png" alt="Help" style="height: 16px; width: 16px; vertical-align: middle;"> <span id="btnHelp2Text">ជំនួយ</span></span></button>
+      <button id="btnAbout2" style="background: #475569; color: #e2e8f0; border: 1px solid #64748b; padding: 4px 4px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; min-height: 28px; display: flex; align-items: center; justify-content: center; line-height: 1;" onclick="document.getElementById('aboutModal').classList.add('active'); document.getElementById('aboutModal').style.display = 'flex'; document.getElementById('helpModal').classList.remove('active'); document.getElementById('helpModal').style.display = 'none'; document.getElementById('licenseModal').classList.remove('active'); document.getElementById('licenseModal').style.display = 'none'; (function(){var lang=localStorage.getItem('kmqr_lang')||'km';var t=window.translations&&window.translations[lang];if(t){var aboutHtml = '<div style=\'text-align:center;\'><b>'+t.title+'</b></div>';aboutHtml += '<div style=\'margin-top:8px;font-size:15px;\'><b>'+t.version+'</b><br><span>'+t.developerLabel+'</span> <span>'+t.developer+'</span></div>';document.getElementById('aboutContent').innerHTML=aboutHtml;}})();">📖 អំពី</button>
+      <button id="langToggle" style="background: #475569; color: #e2e8f0; border: 1px solid #64748b; padding: 4px 4px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; min-height: 28px; display: flex; align-items: center; justify-content: center; line-height: 1;">🌐 English</button>
+      <button id="updateCheckBtn" style="background: #64748b; color: #e2e8f0; border: 1px solid #94a3b8; padding: 4px 4px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; min-height: 28px; display: flex; align-items: center; justify-content: center; line-height: 1;">🔄 កំណែកម្មវិធី</button>
     </div>
   </div>
   </div>
@@ -795,12 +751,12 @@
   <div class="main-wrapper">
     <div class="container">
       <div class="section">
-      <div class="section-title" id="textLabel">Text or URL</div>
-      <input id="qrText" type="text" placeholder="Enter text..." />
+      <div class="section-title" id="textLabel">អត្ថបទ ឬ URL</div>
+      <input id="qrText" type="text" placeholder="បញ្ចូលអត្ថបទ, URL, ឬភាសាខ្មែរ…" />
       
       <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-top: 12px;">
         <div>
-          <label id="sizeLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">Size</label>
+          <label id="sizeLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">ទំហំ</label>
           <select id="qrSize">
             <option value="200">200</option>
             <option value="256">256</option>
@@ -809,16 +765,16 @@
           </select>
         </div>
         <div>
-          <label id="ecLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">Error Correction</label>
+          <label id="ecLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">កំរិតកែកំហុស</label>
           <select id="qrEC">
-            <option value="L" id="ecLow">Low</option>
-            <option value="M" selected id="ecMedium">Medium</option>
-            <option value="Q" id="ecQuartile">Quartile</option>
-            <option value="H" id="ecHigh">High</option>
+            <option value="L" id="ecLow">ទាប</option>
+            <option value="M" selected id="ecMedium">មធ្យម</option>
+            <option value="Q" id="ecQuartile">ខ្ពស់</option>
+            <option value="H" id="ecHigh">ខ្ពស់បំផុត</option>
           </select>
         </div>
         <div>
-          <label id="dpiLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">Quality (DPI)</label>
+          <label id="dpiLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">គុណភាព (DPI)</label>
           <select id="dpiScale">
             <option value="1">1×</option>
             <option value="2" selected>2×</option>
@@ -826,98 +782,48 @@
           </select>
         </div>
         <div>
-          <label id="roundLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">Round Logo</label>
+          <label id="roundLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">រូបសញ្ញាមូល</label>
           <select id="logoRound">
-            <option value="no" id="no">No</option>
-            <option value="yes" selected id="yes">Yes</option>
+            <option value="no" id="no">ទេ</option>
+            <option value="yes" selected id="yes">បាទ/ចាស</option>
           </select>
         </div>
       </div>
       
       <div class="color-row" style="margin-top: 8px; grid-template-columns: 1fr 1fr 1fr;">
         <div>
-          <label id="fgLabel">Foreground</label>
+          <label id="fgLabel">ពណ៌មុខ</label>
           <input id="qrFG" type="color" value="#000000" />
         </div>
         <div>
-          <label id="bgLabel">Background</label>
+          <label id="bgLabel">ពណ៌ខាងក្រោយ</label>
           <input id="qrBG" type="color" value="#ffffff" />
         </div>
         <div>
-          <label id="logoBgLabel">Logo BG</label>
+          <label id="logoBgLabel">ពណ៌ខាងក្រោយរូបសញ្ញា</label>
           <input id="logoBg" type="color" value="#ffffff" />
         </div>
       </div>
 
       <div>
-        <label id="captionLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">Overlay Text</label>
-        <input id="overlayText" type="text" placeholder="e.g. KHEM MY" />
+        <label id="captionLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">អត្ថបទលើកូដ</label>
+        <input id="overlayText" type="text" placeholder="ឧ. ខែម​ មី" />
       </div>
 
       <div>
-        <label id="logoLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">Choose Logo</label>
-        <button id="logoUploadBtn" class="secondary" style="margin-top: 0;" onclick="document.getElementById('logoUpload').click();">📁 Select Image</button>
+        <label id="logoLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">ជ្រើសរើសរូបភាព</label>
+        <button id="logoUploadBtn" class="secondary" style="margin-top: 0;" onclick="document.getElementById('logoUpload').click();">📁 ជ្រើសរូបភាព</button>
         <input id="logoUpload" type="file" accept="image/*" style="display: none;" onchange="handleLogoUpload(this);" />
         <div id="logoPreview" class="logo-preview" style="display: none;"></div>
       </div>
       
-      <button class="primary" id="btnGenerate" onclick="
-        var elText = document.getElementById('qrText');
-        var elSize = document.getElementById('qrSize');
-        var elEC = document.getElementById('qrEC');
-        var elFG = document.getElementById('qrFG');
-        var elBG = document.getElementById('qrBG');
-        var qrPreview = document.getElementById('qrPreview');
-        
-        if (!elText || !elText.value) {
-          alert('Please enter text or URL');
-        } else {
-          try {
-            qrPreview.innerHTML = '';
-            var size = parseInt(elSize.value);
-            var tempDiv = document.createElement('div');
-            tempDiv.style.display = 'none';
-            tempDiv.id = 'qr-temp-' + Date.now();
-            document.body.appendChild(tempDiv);
-            
-            var qrInstance = new QRCode(tempDiv, {
-              text: elText.value,
-              width: size,
-              height: size,
-              colorDark: elFG.value,
-              colorLight: elBG.value,
-              correctLevel: QRCode.CorrectLevel[elEC.value]
-            });
-            
-            setTimeout(() => {
-              var canvas = tempDiv.querySelector('canvas');
-              if (canvas) {
-                exportCanvas = canvas;
-                var imgData = canvas.toDataURL('image/png');
-                var img = document.createElement('img');
-                img.src = imgData;
-                img.style.maxWidth = '100%';
-                img.style.borderRadius = '6px';
-                qrPreview.innerHTML = '';
-                qrPreview.appendChild(img);
-                document.getElementById('btnDownload').disabled = false;
-                document.getElementById('btnShare').disabled = false;
-              }
-              if (document.body.contains(tempDiv)) {
-                document.body.removeChild(tempDiv);
-              }
-            }, 100);
-          } catch (error) {
-            alert('Error: ' + error.message);
-          }
-        }
-      ">Generate QR</button>
+      <button class="primary" id="btnGenerate">✨ បង្កើតកូដ QR</button>
       
-      <button class="ghost" id="btnClear" onclick="document.getElementById('qrText').value = ''; document.getElementById('overlayText').value = ''; document.getElementById('logoPreview').style.display = 'none'; document.getElementById('qrPreview').innerHTML = '<p id=previewHint>Enter text and click Generate</p>'; document.getElementById('btnDownload').disabled = true; document.getElementById('btnShare').disabled = true;" style="width: 100%; margin-top: 12px;">Clear</button>
+      <button class="ghost" id="btnClear" style="width: 100%; margin-top: 12px;">🗑️ សម្អាត</button>
       
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;">
-        <button class="secondary" id="btnDownload" disabled onclick="var m = document.getElementById('downloadMenu'); m.style.display = m.style.display === 'block' ? 'none' : 'block';">📥 Download</button>
-        <button class="secondary" id="btnShare" disabled onclick="var m = document.getElementById('shareMenu'); m.style.display = m.style.display === 'block' ? 'none' : 'block';">📤 Share</button>
+        <button class="secondary" id="btnDownload" disabled onclick="var dm = document.getElementById('downloadMenu'); var sm = document.getElementById('shareMenu'); sm.style.display = 'none'; dm.style.display = dm.style.display === 'block' ? 'none' : 'block';">📥 ទាញយក</button>
+        <button class="secondary" id="btnShare" disabled onclick="var sm = document.getElementById('shareMenu'); var dm = document.getElementById('downloadMenu'); dm.style.display = 'none'; sm.style.display = sm.style.display === 'block' ? 'none' : 'block';">📤 ចែករំលែក</button>
       </div>
       </div>
     </div>
@@ -925,25 +831,25 @@
     <!-- Right side: Preview only -->
     <div class="container">
       <div class="section">
-      <div style="font-size: 14px; font-weight: 700; color: #cbd5e1; margin-bottom: 12px;">Preview</div>
-      <div id="qrPreview"><p id="previewHint">Enter text and click Generate</p></div>
+      <div id="previewLabel" style="font-size: 14px; font-weight: 700; color: #cbd5e1; margin-bottom: 12px;">មើលមុន</div>
+      <div id="qrPreview"><p id="previewHint">បញ្ចូលអត្ថបទ ហើយចុចបង្កើត</p></div>
       </div>
     </div>
   </div>
 
   <!-- Download Format Selector -->
   <div id="downloadMenu" style="display: none; background: #0f172a; padding: 12px; border-radius: 6px; margin: 20px auto; max-width: 1400px; border: 1px solid #334155; margin-left: 8px; margin-right: 8px;">
-    <p style="font-size: 12px; color: #cbd5e1; margin-bottom: 8px; font-weight: 600;">Download Format:</p>
+    <p id="downloadFormatLabel" style="font-size: 12px; color: #cbd5e1; margin-bottom: 8px; font-weight: 600;">ទម្រង់ទាញយក:</p>
     <div class="button-group">
-      <button class="ghost" id="downloadPNG" onclick="downloadCanvas('png');">📄 PNG</button>
-      <button class="ghost" id="downloadJPG" onclick="downloadCanvas('jpg');">📄 JPG</button>
-      <button class="ghost" id="downloadPDF" onclick="downloadCanvas('pdf');">📄 PDF</button>
+      <button class="ghost" id="downloadPNG">📄 PNG</button>
+      <button class="ghost" id="downloadJPG">📄 JPG</button>
+      <button class="ghost" id="downloadPDF">📄 PDF</button>
     </div>
   </div>
 
   <!-- Share Menu -->
   <div id="shareMenu" style="display: none; background: #0f172a; padding: 12px; border-radius: 6px; margin: 0 auto 20px; max-width: 1400px; border: 1px solid #334155; margin-left: 8px; margin-right: 8px;">
-    <p style="font-size: 12px; color: #cbd5e1; margin-bottom: 8px; font-weight: 600;">Share to:</p>
+    <p id="shareToLabel" style="font-size: 12px; color: #cbd5e1; margin-bottom: 8px; font-weight: 600;">ចែករំលែកទៅ:</p>
     <div class="button-group full">
       <button class="ghost" id="shareWhatsApp" onclick="shareToSocial('whatsapp');">📱 WhatsApp</button>
       <button class="ghost" id="shareFacebook" onclick="shareToSocial('facebook');">👍 Facebook</button>
@@ -960,32 +866,9 @@
   <div id="helpModal" class="modal">
     <div class="modal-content" style="max-width: 420px;">
       <button class="close-btn" style="position: absolute; top: 18px; right: 18px; font-size: 36px; color: #94a3b8; background: none; border: none; cursor: pointer;" onclick="document.getElementById('helpModal').classList.remove('active'); document.getElementById('helpModal').style.display = 'none';">&times;</button>
-      <h2 id="helpTitle" style="color: #22d3a9; font-size: 32px; font-weight: 700; margin: 0 0 18px 0; text-align: center;">Help</h2>
+      <h2 id="helpTitle" style="color: #22d3a9; font-size: 32px; font-weight: 700; margin: 0 0 18px 0; text-align: center;">ជំនួយ - KMQR Generator Pro</h2>
       <div id="helpContent" style="font-size:16px;line-height:1.7;color:#e2e8f0;">
-        <h3 style="color:#3b82f6;margin-bottom:10px;text-align:center;font-size:20px;">How to Use KMQR Generator</h3>
-        <ol style="margin-bottom:10px;padding-left:20px;">
-          <li>Enter your text or URL in the input box.</li>
-          <li>Choose size, error correction, and colors as needed.</li>
-          <li>(Optional) Add a logo and overlay text.</li>
-          <li>Click <b>Generate QR</b> to preview your code.</li>
-          <li>Click <b>Download</b> to save as PNG, JPG, or PDF.<br>Click <b>Share</b> to send via WhatsApp, Facebook, etc.</li>
-        </ol>
-        <hr style="margin:16px 0;border:none;border-top:1px solid #475569;">
-        <b>Features:</b>
-        <ul style="margin-bottom:10px;padding-left:20px;">
-          <li>Offline QR code generation</li>
-          <li>Logo overlay and caption</li>
-          <li>High-DPI export (1x, 2x, 3x)</li>
-          <li>Bilingual UI (English/Khmer)</li>
-          <li>Activation for full download</li>
-        </ul>
-        <hr style="margin:16px 0;border:none;border-top:1px solid #475569;">
-        <b>Contact & Support:</b>
-        <div style="margin-top:10px;">
-          📧 Email: <a href="mailto:my.khem.mathst@gmail.com" style="color:#3b82f6;">my.khem.mathst@gmail.com</a><br>
-          📱 Phone: <a href="tel:+855669931319" style="color:#3b82f6;">+855 66/99 931319</a><br>
-          💬 Telegram: <a href="https://t.me/khemmy99" target="_blank" style="color:#3b82f6;">@khemmy99</a>
-        </div>
+        <p><strong>📖 របៀបប្រើប្រាស់៖</strong></p><p>1. បញ្ចូលអត្ថបទ ឬ URL នៅក្នុងចៀនលិខិត<br>2. កែសម្រួលទំហំ ពណ៌ កំរិតកែកំហុស<br>3. បន្ថែមរូបសញ្ញា ហើយអត្ថបទលើកូដ (ទៈចេត្ត)<br>4. ចុច "បង្កើត QR" ដើម្បីមើលកូដរបស់អ្នក<br>5. ទាញយកជា PNG, JPG, ឬ PDF</p><hr style="margin: 16px 0; border: none; border-top: 1px solid #475569;"><p><strong>✨ មុខងារ៖</strong><br>• បង្កើតកូដ QR ក្រៅប្រព័ន្ធដោយគ្មានអ៊ីនទឺណេត<br>• បន្ថែមរូបសញ្ញា ហើយអត្ថបទលើកូដ<br>• ទាញយកគុណភាពខ្ពស់ (1x, 2x, 3x)<br>• គាំទ្រភាសាអង្គ្លេស ហើយខ្មែរ<br>• ម៉ូដសាកល្បង & ដោហសោលទំណាមទៅ<br>• ចែករំលែកលើប្រព័ន្ធសង្កម</p><hr style="margin: 16px 0; border: none; border-top: 1px solid #475569;"><p><strong>🔓 ស្វែងរកដូកប្រើប្រាស់៖</strong><br>📧 <a href="mailto:my.khem.mathst@gmail.com" style="color: #3b82f6;">my.khem.mathst@gmail.com</a><br>📱 <a href="tel:+85566999313199" style="color: #3b82f6;">+855 66/99 931319</a><br>💬 <a href="https://t.me/khemmy99" target="_blank" style="color: #3b82f6;">Telegram: @khemmy99</a></p>
       </div>
     </div>
   </div>
@@ -994,18 +877,20 @@
   <div id="aboutModal" class="modal">
     <div class="modal-content" style="max-width: 420px;">
       <button class="close-btn" onclick="document.getElementById('aboutModal').classList.remove('active'); document.getElementById('aboutModal').style.display = 'none';">&times;</button>
-      <h2 id="aboutTitle" style="color: #3b82f6; font-size: 28px; font-weight: 700; margin: 0 0 12px 0; text-align: center;">About KMQR Generator</h2>
-      <div id="aboutContent" style="font-size:16px;line-height:1.7;color:#e2e8f0;">
-        <p><strong>Version:</strong> 1.0.8</p>
-        <p>KMQR Generator is a professional offline QR code generator for Windows, Android, iOS, and Web. It supports logo overlays, captions, color customization, and high-quality export.</p>
-        <hr style="margin:16px 0;border:none;border-top:1px solid #475569;">
-        <b>Developer:</b> Khem My<br>
-        Email: <a href="mailto:my.khem.mathst@gmail.com" style="color:#3b82f6;">my.khem.mathst@gmail.com</a><br>
-        Phone: <a href="tel:+8556699313199" style="color:#3b82f6;">+855 66/99 931319</a><br>
-        Telegram: <a href="https://t.me/khemmy99" target="_blank" style="color:#3b82f6;">@khemmy99</a><br>
-        Facebook: <a href="https://facebook.com/KMLOL" target="_blank" style="color:#3b82f6;">facebook.com/KMLOL</a>
-        <hr style="margin:16px 0;border:none;border-top:1px solid #475569;">
-        <b>Copyright:</b> © 2024-2026 Khem My. All rights reserved.
+      <h2 id="aboutTitle" style="color: #3b82f6; font-size: 28px; font-weight: 700; margin: 0 0 12px 0; text-align: center;">អំពី KMQR Generator Pro</h2>
+      <div id="aboutContent" style="font-size:16px;line-height:1.7;color:#e2e8f0;"></div>
+    </div>
+  </div>
+  
+  <!-- Footer Contact Info -->
+  <div style="padding:20px;color:#cbd5e1;text-align:center;font-size:14px;background:#0f172a;border-top:1px solid #1e293b;">
+    <div style="line-height:1.6;">
+      <span id="footerPhone">ទូរស័ព្ទ: <a href="tel:+8556699313199" style="color:#3b82f6;">+855 66/99 931319</a></span> | 
+      <span id="footerTelegram">តេលេក្រាម: <a href="https://t.me/khemmy99" target="_blank" style="color:#3b82f6;">@khemmy99</a></span> | 
+      <span id="footerFacebook">ហ្វេកបុក: <a href="https://facebook.com/KMLOL" target="_blank" style="color:#3b82f6;">facebook.com/KMLOL</a></span> | 
+      <span id="footerCopyright"><b id="footerCopyrightLabel">រក្សាសិទ្ធិ:</b> © 2026 ខែម មី. <span id="footerRights">រក្សាសិទ្ធិគ្រប់យ៉ាង។</span></span>
+    </div>
+  </div>
       </div>
     </div>
   </div>
@@ -1025,34 +910,23 @@
           Generate QR codes with all customization options
         </p>
 
-        <p style="font-size: 13px; color: #fbbf24; margin-bottom: 12px; text-align: center; line-height: 1.6; background: #1e293b; padding: 10px; border-radius: 6px; border: 1px solid #fbbf24;">
-          <strong>🔒 Download is Locked</strong><br>
-          Click ACTIVATE to unlock all download formats
-        </p>
+        <p id="downloadLockedMsg" style="font-size: 13px; color: #fbbf24; margin-bottom: 12px; text-align: center; line-height: 1.6; background: #1e293b; padding: 10px; border-radius: 6px; border: 1px solid #fbbf24;"></p>
 
         <div style="background: #0f172a; padding: 12px; border-radius: 6px; border: 1px solid #475569; margin-bottom: 12px;">
-          <p style="font-size: 12px; color: #cbd5e1; line-height: 1.6; margin-bottom: 8px;">
-            <strong>✨ Full Version Unlocks:</strong>
-          </p>
-          <p style="font-size: 12px; color: #cbd5e1; line-height: 1.8;">
-            ✓ Download PNG format<br>
-            ✓ Download JPG format<br>
-            ✓ Download PDF format<br>
-            ✓ Unlimited QR codes<br>
-            ✓ All customization options
-          </p>
+          <p id="fullVersionTitle" style="font-size: 12px; color: #cbd5e1; line-height: 1.6; margin-bottom: 8px;"></p>
+          <p id="featuresList" style="font-size: 12px; color: #cbd5e1; line-height: 1.8;"></p>
         </div>
       </div>
 
-      <button id="acceptLicense" class="primary" style="width: 100%; margin-top: 8px; background: linear-gradient(135deg, #10b981, #059669); border: none; cursor: pointer;">🎉 Activate Now</button>
+      <button id="acceptLicense" class="primary" style="width: 100%; margin-top: 8px; background: linear-gradient(135deg, #10b981, #059669); border: none; cursor: pointer;"></button>
     </div>
   </div>
 
   <script>
     // ========== LICENSE ACTIVATION SYSTEM ==========
     function generateLicenseKey() {
-      // Trial mode - no key needed
-      return 'TRIAL-MODE';
+      // Professional license code for demonstration
+      return 'KMQR-PRO-2026';
     }
 
     function initializeLicense() {
@@ -1112,7 +986,7 @@
       const qrPreview = document.getElementById('qrPreview');
       
       if (!elText || !elText.value) {
-        alert('Please enter text or URL');
+        alert(translations[currentLang].alertEnterText);
         return;
       }
 
@@ -1209,11 +1083,6 @@
       
       // Check for updates
       checkForUpdates();
-      
-      // Show device-specific info
-      setTimeout(() => {
-        showDeviceInfo();
-      }, 1000);
     }
 
     // ========== UPDATE CHECK SYSTEM ==========
@@ -1246,8 +1115,50 @@
     
     function performUpdate() {
       // Clear cache and reload
-      localStorage.setItem('kmqr_version_loaded', LATEST_VERSION);
-      window.location.href = window.location.href.split('?')[0] + '?v=' + LATEST_VERSION + '&t=' + Date.now();
+      // Show update info modal with only version and contact message
+      document.getElementById('helpModal').classList.remove('active');
+      document.getElementById('helpModal').style.display = 'none';
+      document.getElementById('licenseModal').classList.remove('active');
+      document.getElementById('licenseModal').style.display = 'none';
+      document.getElementById('aboutModal').classList.remove('active');
+      document.getElementById('aboutModal').style.display = 'none';
+      var updateInfoModal = document.getElementById('updateInfoModal');
+      var updateInfoContent = document.getElementById('updateInfoContent');
+      var msg = '';
+      var heading = '';
+      if (currentLang === 'km') {
+        heading = 'បច្ចុប្បន្នភាពកម្មវិធី';
+        msg = '<div style="font-size:18px;font-weight:700;color:#f59e0b;">ជំនាន់ ១.០.៨</div>' +
+          '<div style="margin-bottom:8px;">សម្រាប់ធ្វើបច្ចុប្បន្នភាព សូមទំនាក់ទំនងអ្នកអភិវឌ្ឍន៍</div>' +
+          '<div style="color:#3b82f6;">'
+          + '<span style="display:block;margin-bottom:4px;">អ៊ីមែល: <a href="mailto:my.khem.mathst@gmail.com" style="color:#3b82f6;text-decoration:underline;">my.khem.mathst@gmail.com</a></span>'
+          + '<span style="display:block;margin-bottom:4px;">ទូរស័ព្ទ: <a href="tel:+8556699313199" style="color:#3b82f6;text-decoration:underline;">+855 66/99 931319</a></span>'
+          + '<span style="display:block;">តេលេក្រាម: <a href="https://t.me/khemmy99" target="_blank" style="color:#3b82f6;text-decoration:underline;">@khemmy99</a></span>'
+          + '</div>';
+        // Update modal heading only
+        document.querySelector('#updateInfoModal h2').textContent = heading;
+      } else {
+        heading = 'Update Info';
+        msg = '<div style="font-size:18px;font-weight:700;color:#f59e0b;">Version 1.0.8</div>' +
+          '<div style="margin:16px 0 8px 0;">For update, please contact developer</div>' +
+          '<div style="color:#3b82f6;">'
+          + '<span style="display:block;margin-bottom:4px;">E-mail: <a href="mailto:my.khem.mathst@gmail.com" style="color:#3b82f6;text-decoration:underline;">my.khem.mathst@gmail.com</a></span>'
+          + '<span style="display:block;margin-bottom:4px;">Phone: <a href="tel:+8556699313199" style="color:#3b82f6;text-decoration:underline;">+855 66/99 931319</a></span>'
+          + '<span style="display:block;">Telegram: <a href="https://t.me/khemmy99" target="_blank" style="color:#3b82f6;text-decoration:underline;">@khemmy99</a></span>'
+          + '</div>';
+        document.querySelector('#updateInfoModal h2').textContent = heading;
+      }
+      updateInfoContent.innerHTML = msg;
+      updateInfoModal.classList.add('active');
+      updateInfoModal.style.display = 'flex';
+      // If you want to allow update after info, uncomment below:
+      // if (confirm('Continue to update?')) {
+      //   localStorage.setItem('kmqr_version_loaded', LATEST_VERSION);
+      //   if (localStorage.getItem('kmqr_app_activated') === 'true') {
+      //     localStorage.setItem('kmqr_welcome_shown', 'true');
+      //   }
+      //   window.location.href = window.location.href.split('?')[0] + '?v=' + LATEST_VERSION + '&t=' + Date.now();
+      // }
     }
 
     // Run initialization immediately
@@ -1260,7 +1171,9 @@
     // Also accept license button handler
     document.addEventListener('DOMContentLoaded', () => {
       console.log('DOMContentLoaded fired - all buttons should be ready');
-      updateActivationStatus();
+        // Set all button text to default language on first load
+        updateLanguage(currentLang);
+        updateActivationStatus();
       
       // Attach update button handler
       const updateNowBtn = document.getElementById('updateNowBtn');
@@ -1283,7 +1196,7 @@
         if (statusDiv) statusDiv.style.display = 'block';
         // Show deactivate button (red/orange style)
         if (activateBtn) {
-          activateBtn.textContent = '🔒 Deactivate';
+          activateBtn.textContent = translations[currentLang].btnDeactivate;
           activateBtn.style.display = 'block';
           activateBtn.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
           activateBtn.style.backgroundImage = 'linear-gradient(135deg, #ef4444, #dc2626)';
@@ -1292,7 +1205,7 @@
           activateBtn.style.boxShadow = '0 2px 6px rgba(239,68,68,0.25)';
           activateBtn.onclick = function() {
             // Confirm deactivation
-            if (confirm('Are you sure you want to deactivate? You will need to enter a license code again.')) {
+            if (confirm(translations[currentLang].confirmDeactivate)) {
               // Clear license and activation
               localStorage.removeItem('kmqr_app_activated');
               localStorage.removeItem('kmqr_license_code');
@@ -1304,17 +1217,16 @@
                 modal.style.display = 'none';
               });
               
-              // Show welcome screen
-              const welcomeModal = document.getElementById('welcomeModal');
-              if (welcomeModal) {
-                welcomeModal.style.display = 'block';
+              // Show license modal directly after deactivation
+              const licenseModal = document.getElementById('licenseModal');
+              if (licenseModal) {
+                licenseModal.classList.add('active');
+                licenseModal.style.display = 'flex';
               }
-              
               // Hide app
               document.querySelectorAll('.container').forEach(el => el.style.display = 'none');
               document.querySelectorAll('.main-wrapper').forEach(el => el.style.display = 'none');
               document.querySelectorAll('[style*="position: sticky"]').forEach(el => el.style.display = 'none');
-              
               // Update button
               updateActivationStatus();
             }
@@ -1324,7 +1236,7 @@
         if (statusDiv) statusDiv.style.display = 'none';
         // Show activate button (green style)
         if (activateBtn) {
-          activateBtn.textContent = '🔓 Activate';
+          activateBtn.textContent = translations[currentLang].btnActivate;
           activateBtn.style.display = 'block';
           activateBtn.style.background = 'linear-gradient(135deg, #10b981, #059669)';
           activateBtn.style.backgroundImage = 'linear-gradient(135deg, #10b981, #059669)';
@@ -1344,6 +1256,7 @@
     const translations = {
       en: {
         title: 'KMQR Generator',
+        aboutContent: '',
         textLabel: 'Text or URL',
         textPlaceholder: 'Enter text, URL, or Khmer...',
         sizeLabel: 'Size',
@@ -1362,7 +1275,9 @@
         captionLabel: 'Overlay Text',
         captionPlaceholder: 'e.g. KHEM MY',
         logoLabel: 'Choose Logo',
-        btnGenerate: 'Generate QR',
+        logoUploadBtn: '📁 Select Image',
+        previewLabel: 'Preview',
+        btnGenerate: '✨Generate QR',
         btnDownload: '📥 Download',
         btnClear: 'Clear',
         btnHelp: 'Help',
@@ -1370,13 +1285,47 @@
         btnShare: '📤 Share',
         updateBtn: '🔄 Update',
         previewHint: 'Enter text and click Generate',
-        helpTitle: 'Help - KMQR Generator Pro',
+        alertEnterText: 'Please enter text or URL',
+        downloadFormatLabel: 'Download Format:',
+        shareToLabel: 'Share to:',
+        alertDownloadLocked: '🔒 Download is locked in Trial Mode\n\nClick the GREEN ACTIVATE button to unlock all downloads!',
+        footerPhone: 'Phone:',
+        footerTelegram: 'Telegram:',
+        footerFacebook: 'Facebook:',
+        footerCopyright: 'Copyright:',
+        footerRights: 'All rights reserved.',
+        // License & Activation
+        welcomeTitle: '🎉 Welcome to KMQR',
+        welcomeSubtitle: 'Generate QR codes with professional features',
+        btnEnterLicense: '✅ Enter License',
+        btnSkipTrial: '⏭️ Try Free',
+        trialModeInfo: 'Trial mode: Generate & customize QR codes freely<br>Full license: Unlock all download formats',
+        licenseModalTitle: '🔓 Enter License Code',
+        licenseInstructions: '<strong>Paste your license code below to unlock full features:</strong>',
+        licensePlaceholder: 'Enter your license code here...',
+        licenseContactInfo: '📧 Don\'t have a license code?<br>Contact: <strong>my.khem.mathst@gmail.com</strong><br>📱 Phone: <strong>+855 66/99 931319</strong><br>💬 Telegram: <strong>@khemmy99</strong>',
+        btnActivateLicense: '✅ Activate',
+        btnCancelLicense: 'Cancel',
+        btnActivate: '🔓 Activate',
+        btnDeactivate: '🔒 Deactivate',
+        confirmDeactivate: 'Are you sure you want to deactivate? You will need to enter a license code again.',
+        downloadLocked: '<strong>🔒 Download is Locked</strong><br>Click ACTIVATE to unlock all download formats',
+        fullVersionFeatures: '<strong>✨ Full Version Unlocks:</strong>',
+        featuresList: '✓ Download PNG format<br>✓ Download JPG format<br>✓ Download PDF format<br>✓ Unlimited QR codes<br>✓ All customization options',
+        btnActivateNow: '🎉 Activate Now',
+        alertEnterLicense: '❌ Please enter a license code',
+        alertInvalidLicense: '❌ Invalid license code numbers.​ Please contact develpoer for license code or use trail',
+        helpTitle: 'Help',
         helpContent: '<p><strong>📖 How to Use:</strong></p><p>1. Enter text or URL in the input field<br>2. Customize size, colors, error correction<br>3. Add logo (optional)<br>4. Click "Generate QR" to create the code<br>5. Download as PNG, JPG, or PDF</p><hr style="margin: 16px 0; border: none; border-top: 1px solid #475569;"><p><strong>✨ Features:</strong><br>• Offline QR code generation<br>• Logo overlay with customizable background<br>• High-quality DPI export (1x, 2x, 3x)<br>• English & Khmer bilingual support<br>• Trial Mode & License Activation<br>• Social media sharing</p><hr style="margin: 16px 0; border: none; border-top: 1px solid #475569;"><p><strong>🔓 Get License:</strong><br>📧 <a href="mailto:my.khem.mathst@gmail.com" style="color: #3b82f6;">my.khem.mathst@gmail.com</a><br>📱 <a href="tel:+85566999313199" style="color: #3b82f6;">+855 66/99 931319</a><br>💬 <a href="https://t.me/khemmy99" target="_blank" style="color: #3b82f6;">Telegram: @khemmy99</a></p>',
-        aboutTitle: 'About KMQR Generator Pro',
-        aboutContent: '<p style="text-align: center; margin-bottom: 20px;"><strong style="font-size: 18px; color: #10b981;">KMQR Generator</strong><br><strong>Version 1.0.7</strong><br><em style="color: #94a3b8;">Professional Edition</em></p><hr style="margin: 16px 0; border: none; border-top: 1px solid #475569;"><p><strong>👨‍💻 Developer:</strong><br>Khem My<br><em>Full-Stack Web Developer</em><br><em>QR Code Specialist</em></p><hr style="margin: 16px 0; border: none; border-top: 1px solid #475569;"><p><strong>📧 Contact Information:</strong><br>Email: <a href="mailto:my.khem.mathst@gmail.com" style="color: #3b82f6;">my.khem.mathst@gmail.com</a><br>Phone: <a href="tel:+85566999313199" style="color: #3b82f6;">+855 66/99 931319</a><br>Facebook: <a href="https://facebook.com/KMLOL" target="_blank" style="color: #3b82f6;">facebook.com/KMLOL</a><br>Telegram: <a href="https://t.me/khemmy99" target="_blank" style="color: #3b82f6;">@khemmy99</a></p><hr style="margin: 16px 0; border: none; border-top: 1px solid #475569;"><p><strong>© Copyright</strong><br>© 2024-2026 Khem My. All rights reserved.<br><em style="color: #94a3b8; font-size: 12px;">KMQR Generator is provided as-is for professional QR code generation.</em></p>'
+        aboutTitle: 'About',
+        version: 'Version 1.0.8',
+        developerLabel: '👨‍💻 Developer:',
+        developer: 'Khem My<br><em>Full-Stack Web Developer</em><br><em>QR Code Specialist</em>',
+        deviceIdLabel: 'Device ID (for license):',
       },
       km: {
         title: 'កម្មវិធីបង្កើត QR',
+        aboutContent: '',
         textLabel: 'អត្ថបទ ឬ URL',
         textPlaceholder: 'បញ្ចូលអត្ថបទ, URL, ឬភាសាខ្មែរ…',
         sizeLabel: 'ទំហំ',
@@ -1395,22 +1344,55 @@
         captionLabel: 'អត្ថបទលើកូដ',
         captionPlaceholder: 'ឧ. ខែម​ មី',
         logoLabel: 'ជ្រើសរើសរូបភាព',
-        btnGenerate: 'បង្កើតកូដ QR',
+        logoUploadBtn: '📁 ជ្រើសរូបភាព',
+        previewLabel: 'មើលមុន',
+        btnGenerate: '✨ បង្កើតកូដ QR',
         btnDownload: '📥 ទាញយក',
         btnClear: 'សម្អាត',
-        btnHelp: 'ជំនួយ',
+        btnHelp: '📖ជំនួយ',
         btnAbout: 'អំពីកម្មវិធី',
         btnShare: '📤 ចែករំលែក',
         updateBtn: '🔄 កំណែកម្មវិធី',
         previewHint: 'បញ្ចូលអត្ថបទ ហើយចុចបង្កើត',
-        helpTitle: 'ជំនួយ - KMQR Generator Pro',
-        helpContent: '<p><strong>📖 របៀបប្រើប្រាស់៖</strong></p><p>១. បញ្ចូលអត្ថបទ ឬ URL នៅក្នុងវាលបញ្ចូល<br>២. កែលម្អទំហំ ពណ៌ និងកម្រិតកែកំហុស<br>៣. បន្ថែមរូបសញ្ញា (ស្ នៃចាប់ផ្តើម)<br>៤. ចុច "បង្កើតកូដ QR" ដើម្បីបង្កើតលេខកូដ<br>៥. ទាញយកជា PNG, JPG ឬ PDF</p><hr style="margin: 16px 0; border: none; border-top: 1px solid #475569;"><p><strong>✨ លក្ខណៈពិសេស៖</strong><br>• បង្កើតលេខកូដ QR ដោយគ្មាននឹងលើបណ្តាញ<br>• រូបសញ្ញាលើស្រទាប់ដែលបានលម្អ<br>• នាំចេញគុណភាពខ្ពស់ DPI (1x, 2x, 3x)<br>• គាំទបទ្វេភាសា (អង់គ្លេស & ខ្មែរ)<br>• ម៉ូដលំរាយការណ៍ និងសកម្មកម្មវិធី<br>• ចែករំលែកលើមេឌៀ</p><hr style="margin: 16px 0; border: none; border-top: 1px solid #475569;"><p><strong>🔓 ទទួលលីសង្សឹក៖</strong><br>📧 <a href="mailto:my.khem.mathst@gmail.com" style="color: #3b82f6;">my.khem.mathst@gmail.com</a><br>📱 <a href="tel:+85566999313199" style="color: #3b82f6;">+855 66/99 931319</a><br>💬 <a href="https://t.me/khemmy99" target="_blank" style="color: #3b82f6;">Telegram: @khemmy99</a></p>',
-        aboutTitle: 'អំពី KMQR Generator Pro',
-        aboutContent: '<p style="text-align: center; margin-bottom: 20px;"><strong style="font-size: 18px; color: #10b981;">KMQR Generator</strong><br><strong>ជំនាន់ ១.០.៦</strong><br><em style="color: #94a3b8;">ក្រុម​វិជ្ជាជីវៈ</em></p><hr style="margin: 16px 0; border: none; border-top: 1px solid #475569;"><p><strong>👨‍💻 អ្នកបង្កើត៖</strong><br>ខែម​ មី<br><em>អ្នកអភិវឌ្ឍគេហទំព័រពេញលេញ</em><br><em>ឯកទេស QR Code</em></p><hr style="margin: 16px 0; border: none; border-top: 1px solid #475569;"><p><strong>📧 ព័ត៌មាននាក់ទាក់ទង៖</strong><br>អ៊ីមែល៖ <a href="mailto:my.khem.mathst@gmail.com" style="color: #3b82f6;">my.khem.mathst@gmail.com</a><br>ទូរស័ព្ទ៖ <a href="tel:+85566999313199" style="color: #3b82f6;">+855 66/99 931319</a><br>Facebook៖ <a href="https://facebook.com/KMLOL" target="_blank" style="color: #3b82f6;">facebook.com/KMLOL</a><br>Telegram៖ <a href="https://t.me/khemmy99" target="_blank" style="color: #3b82f6;">@khemmy99</a></p><hr style="margin: 16px 0; border: none; border-top: 1px solid #475569;"><p><strong>© រក្សាសិទ្ធិ</strong><br>© ២០២៤-២០២៦ ខែម​ មី។ រក្សាសិទ្ធិគ្រប់យ៉ាង។<br><em style="color: #94a3b8; font-size: 12px;">KMQR Generator ផ្តល់ជូនក្នុងលក្ខណ្ឌដូចដែលជាសម្រាប់ការបង្កើតលេខកូដ QR។</em></p>'
+        alertEnterText: 'សូមបញ្ចូលអត្ថបទ ឬ URL',
+        downloadFormatLabel: 'ទម្រង់ទាញយក៖',
+        shareToLabel: 'ចែករំលែកទៅ៖',
+        alertDownloadLocked: '🔒 ការទាញយកត្រូវបានចាក់សោ\n\nចុចបូតុងពណ៌បៃតងដើម្បីដោះសោរទាញយកទាំងអស់!',
+        footerPhone: 'ទូរស័ព្ទ:',
+        footerTelegram: 'តេលេក្រាម:',
+        footerFacebook: 'ហ្វេកបុក:',
+        footerCopyright: 'រក្សាសិទ្ធិ:',
+        footerRights: 'រក្សាសិទ្ធិគ្រប់យ៉ាង។',
+        // License & Activation
+        welcomeTitle: '🎉 សូមស្វាគមន៍មកកាន់ KMQR',
+        welcomeSubtitle: 'បង្កើតកូដ QR ជាមួយមុខងារវិជ្ជាជីវៈ',
+        btnEnterLicense: '✅ បញ្ចូលលេខកូដ',
+        btnSkipTrial: '⏭️ សាកល្បងឥតគិតថ្លៃ',
+        trialModeInfo: 'ម៉ូដសាកល្បង៖ បង្កើត និងកែសម្រួល QR ដោយសេរី<br>កូដប្រើប្រាស់ពេញលេញ៖ ដោះសោទាញយកគ្រប់ទម្រង់',
+        licenseModalTitle: '🔓 បញ្ចូលលេខកូដ',
+        licenseInstructions: '<strong>បញ្ចូលលេខកូដរបស់អ្នកខាងក្រោមដើម្បីដោះសោមុខងារពេញលេញ៖</strong>',
+        licensePlaceholder: 'បញ្ចូលលេខកូដរបស់អ្នកនៅទីនេះ...',
+        licenseContactInfo: '📧 មិនមានលេខកូដទេ?<br>ទំនាក់ទំនង៖ <strong>my.khem.mathst@gmail.com</strong><br>📱 ទូរស័ព្ទ៖ <strong>+855 66/99 931319</strong><br>💬 Telegram៖ <strong>@khemmy99</strong>',
+        btnActivateLicense: '✅ ធ្វើឱ្យសកម្ម',
+        btnCancelLicense: 'បោះបង់',
+        btnActivate: '🔓 ធ្វើឱ្យសកម្ម',
+        btnDeactivate: '🔒 បិទសកម្ម',
+        confirmDeactivate: 'តើអ្នកពិតជាប្រាកដចង់បិទសកម្មទេ? អ្នកនឹងត្រូវបញ្ចូលលេខកូដម្តងទៀត។',
+        downloadLocked: '<strong>🔒 ការទាញយកត្រូវបានចាក់សោ</strong><br>ចុចធ្វើឱ្យសកម្មដើម្បីដោះសោទម្រង់ទាញយកទាំងអស់',
+        fullVersionFeatures: '<strong>✨ កំណែពេញលេញដោះសោ៖</strong>',
+        featuresList: '✓ ទាញយកទម្រង់ PNG<br>✓ ទាញយកទម្រង់ JPG<br>✓ ទាញយកទម្រង់ PDF<br>✓ កូដ QR គ្មានដែនកំណត់<br>✓ ជម្រើសកែសម្រួលទាំងអស់',
+        btnActivateNow: '🎉 ធ្វើឱ្យសកម្មឥឡូវ',
+        alertEnterLicense: '❌ សូមបញ្ចូលលេខកូដ',
+        alertInvalidLicense: '❌ លេខកូដមិនត្រឹមត្រូវ។ សូមទាក់ទងអ្នកអភិវឌ្ឍកម្មវិធីដើម្បីទទួលសិទ្ធិប្រើប្រាស់ពេញលេញ- ឬប្រើសាកល្បង',
+        helpTitle: 'ណែនាំពីរបៀបប្រើប្រាស់',
+        helpContent: '<p><strong>📖 របៀបប្រើប្រាស់៖</strong></p><p>១. បញ្ចូលអត្ថបទ ឬ URL នៅក្នុងវាលបញ្ចូល<br>២. កែលម្អទំហំ ពណ៌ និងកម្រិតកែកំហុស<br>៣. បន្ថែមរូបសញ្ញា(បន្ថែម)<br>៤. ចុច "បង្កើតកូដ QR" ដើម្បីបង្កើតលេខកូដ<br>៥. ទាញយកជា PNG, JPG ឬ PDF</p><hr style="margin: 16px 0; border: none; border-top: 1px solid #475569;"><p><strong>✨ លក្ខណៈពិសេស៖</strong><br>• បង្កើតលេខកូដ QR ដោយស្វ័យប្រវត្តិ<br>• រូបសញ្ញាលើស្រទាប់ដែលបានលម្អ<br>• នាំចេញគុណភាពខ្ពស់ DPI (1x, 2x, 3x)<br>• ប្រើបានពីរភាសារ(អង់គ្លេស & ខ្មែរ)<br>• កម្មវិធីសាកល្បង និងកម្មវិធីទិញកម្មសិទ្ធិ<br>• ចែករំលែកលើមេឌៀ</p><hr style="margin: 16px 0; border: none; border-top: 1px solid #475569;"><p><strong>🔓 ទទួលសិទ្ធិប្រើប្រាស់៖</strong><br>📧 <a href="mailto:my.khem.mathst@gmail.com" style="color: #3b82f6;">my.khem.mathst@gmail.com</a><br>📱 <a href="tel:+85566999313199" style="color: #3b82f6;">+855 66/99 931319</a><br>💬 <a href="https://t.me/khemmy99" target="_blank" style="color: #3b82f6;">Telegram: @khemmy99</a></p>',
+        aboutTitle: 'អំពីកម្មវិធី',
+        version: 'ជំនាន់ ១.០.៨',
+        developerLabel: '👨‍💻 អ្នកបង្កើត៖',
+        developer: 'ខែម មី<br><em>អ្នកអភិវឌ្ឍកម្មវិធី</em><br><em>ឯកទេស QR Code</em>',
+        deviceIdLabel: 'លេខសម្គាល់ឧបករណ៍ (សម្រាប់កូដប្រើប្រាស់):',
       }
     };
-
-    let currentLang = localStorage.getItem('kmqr_lang') || 'km';
 
     // Initialize button text based on current language
     const initLangBtn = document.getElementById('langToggle');
@@ -1419,44 +1401,106 @@
     }
 
     function updateLanguage(lang) {
+        // Update About button caption for language
+        if (document.getElementById('btnAbout2Text')) document.getElementById('btnAbout2Text').textContent = t.btnAbout;
       currentLang = lang;
       localStorage.setItem('kmqr_lang', lang);
       const t = translations[lang];
       
-      document.getElementById('title').textContent = t.title;
-      document.getElementById('textLabel').textContent = t.textLabel;
-      document.getElementById('qrText').placeholder = t.textPlaceholder;
-      document.getElementById('sizeLabel').textContent = t.sizeLabel;
-      document.getElementById('ecLabel').textContent = t.ecLabel;
-      document.getElementById('ecLow').textContent = t.ecLow;
-      document.getElementById('ecMedium').textContent = t.ecMedium;
-      document.getElementById('ecQuartile').textContent = t.ecQuartile;
-      document.getElementById('ecHigh').textContent = t.ecHigh;
-      document.getElementById('dpiLabel').textContent = t.dpiLabel;
-      document.getElementById('roundLabel').textContent = t.roundLabel;
-      document.getElementById('yes').textContent = t.yes;
-      document.getElementById('no').textContent = t.no;
-      document.getElementById('fgLabel').textContent = t.fgLabel;
-      document.getElementById('bgLabel').textContent = t.bgLabel;
-      document.getElementById('logoBgLabel').textContent = t.logoBgLabel;
-      document.getElementById('captionLabel').textContent = t.captionLabel;
-      document.getElementById('overlayText').placeholder = t.captionPlaceholder;
-      document.getElementById('logoLabel').textContent = t.logoLabel;
-      document.getElementById('btnGenerate').textContent = t.btnGenerate;
-      document.getElementById('btnDownload').textContent = t.btnDownload;
-      document.getElementById('btnClear').textContent = t.btnClear;
-      document.getElementById('btnHelp').textContent = t.btnHelp;
-      document.getElementById('btnAbout').textContent = t.btnAbout;
+      if (document.getElementById('title')) document.getElementById('title').textContent = t.title;
+      if (document.getElementById('textLabel')) document.getElementById('textLabel').textContent = t.textLabel;
+      if (document.getElementById('qrText')) document.getElementById('qrText').placeholder = t.textPlaceholder;
+      if (document.getElementById('sizeLabel')) document.getElementById('sizeLabel').textContent = t.sizeLabel;
+      if (document.getElementById('ecLabel')) document.getElementById('ecLabel').textContent = t.ecLabel;
+      if (document.getElementById('ecLow')) document.getElementById('ecLow').textContent = t.ecLow;
+      if (document.getElementById('ecMedium')) document.getElementById('ecMedium').textContent = t.ecMedium;
+      if (document.getElementById('ecQuartile')) document.getElementById('ecQuartile').textContent = t.ecQuartile;
+      if (document.getElementById('ecHigh')) document.getElementById('ecHigh').textContent = t.ecHigh;
+      if (document.getElementById('dpiLabel')) document.getElementById('dpiLabel').textContent = t.dpiLabel;
+      if (document.getElementById('roundLabel')) document.getElementById('roundLabel').textContent = t.roundLabel;
+      if (document.getElementById('yes')) document.getElementById('yes').textContent = t.yes;
+      if (document.getElementById('no')) document.getElementById('no').textContent = t.no;
+      if (document.getElementById('fgLabel')) document.getElementById('fgLabel').textContent = t.fgLabel;
+      if (document.getElementById('bgLabel')) document.getElementById('bgLabel').textContent = t.bgLabel;
+      if (document.getElementById('logoBgLabel')) document.getElementById('logoBgLabel').textContent = t.logoBgLabel;
+      if (document.getElementById('captionLabel')) document.getElementById('captionLabel').textContent = t.captionLabel;
+      if (document.getElementById('overlayText')) document.getElementById('overlayText').placeholder = t.captionPlaceholder;
+      if (document.getElementById('logoLabel')) document.getElementById('logoLabel').textContent = t.logoLabel;
+      if (document.getElementById('logoUploadBtn')) document.getElementById('logoUploadBtn').textContent = t.logoUploadBtn;
+      if (document.getElementById('previewLabel')) document.getElementById('previewLabel').textContent = t.previewLabel;
+      if (document.getElementById('btnGenerate')) document.getElementById('btnGenerate').textContent = t.btnGenerate;
+      if (document.getElementById('btnDownload')) document.getElementById('btnDownload').textContent = t.btnDownload;
+      if (document.getElementById('btnClear')) document.getElementById('btnClear').textContent = t.btnClear;
+      if (document.getElementById('btnHelp2')) document.getElementById('btnHelp2').textContent = t.btnHelp;
+      if (document.getElementById('btnAbout2')) document.getElementById('btnAbout2').textContent = t.btnAbout;
       if (document.getElementById('btnShare')) document.getElementById('btnShare').textContent = t.btnShare;
-      if (document.getElementById('updateCheckBtn')) document.getElementById('updateCheckBtn').textContent = t.updateBtn || '🔄 Update';
-      document.getElementById('previewHint').textContent = t.previewHint;
-      document.getElementById('helpTitle').textContent = t.helpTitle;
-      document.getElementById('helpContent').innerHTML = t.helpContent;
-      document.getElementById('aboutTitle').textContent = t.aboutTitle;
-      document.getElementById('aboutContent').innerHTML = t.aboutContent;
+      if (document.getElementById('updateCheckBtn')) {
+        const btn = document.getElementById('updateCheckBtn');
+        btn.textContent = t.updateBtn || '🔄 Update';
+        btn.style.display = 'inline-block';
+        btn.onclick = performUpdate;
+      }
+      if (document.getElementById('updateNowBtn')) {
+        const btn = document.getElementById('updateNowBtn');
+        btn.textContent = t.updateBtn || '🔄 Update';
+        btn.style.display = 'inline-block';
+        btn.onclick = performUpdate;
+      }
+      if (document.getElementById('previewHint')) document.getElementById('previewHint').textContent = t.previewHint;
+      if (document.getElementById('previewHint')) document.getElementById('previewHint').textContent = t.previewHint;
+      if (document.getElementById('downloadFormatLabel')) document.getElementById('downloadFormatLabel').textContent = t.downloadFormatLabel;
+      if (document.getElementById('shareToLabel')) document.getElementById('shareToLabel').textContent = t.shareToLabel;
+      if (document.getElementById('helpTitle')) document.getElementById('helpTitle').textContent = t.helpTitle;
+      if (document.getElementById('helpContent')) document.getElementById('helpContent').innerHTML = t.helpContent;
+      if (document.getElementById('aboutTitle')) document.getElementById('aboutTitle').textContent = t.aboutTitle;
+      // Always show version and developer info in About modal
+      if (document.getElementById('aboutContent')) {
+        var aboutHtml = '<div style="text-align:center;"><b>' + t.title + '</b></div>';
+        aboutHtml += '<div style="margin-top:8px;font-size:15px;"><b>' + t.version + '</b><br><span>' + t.developerLabel + '</span> <span>' + t.developer + '</span></div>';
+        document.getElementById('aboutContent').innerHTML = aboutHtml;
+      }
       
-      // Update language and button text
-      currentLang = lang;
+      // License & Activation elements
+      if (document.getElementById('welcomeTitle')) document.getElementById('welcomeTitle').textContent = t.welcomeTitle;
+      if (document.getElementById('welcomeSubtitle')) document.getElementById('welcomeSubtitle').textContent = t.welcomeSubtitle;
+      if (document.getElementById('btnEnterLicense')) document.getElementById('btnEnterLicense').textContent = t.btnEnterLicense;
+      if (document.getElementById('btnSkipTrial')) document.getElementById('btnSkipTrial').textContent = t.btnSkipTrial;
+      if (document.getElementById('trialModeInfo')) document.getElementById('trialModeInfo').innerHTML = t.trialModeInfo;
+      if (document.getElementById('licenseModalTitle')) document.getElementById('licenseModalTitle').textContent = t.licenseModalTitle;
+      if (document.getElementById('licenseInstructions')) document.getElementById('licenseInstructions').innerHTML = t.licenseInstructions;
+      if (document.getElementById('licenseCodeInput')) document.getElementById('licenseCodeInput').placeholder = t.licensePlaceholder;
+      if (document.getElementById('licenseContactInfo')) document.getElementById('licenseContactInfo').innerHTML = t.licenseContactInfo;
+      // Update device ID info in license modal
+      if (document.getElementById('deviceIdInfo')) updateDeviceIdInfo();
+      if (document.getElementById('btnActivateLicense')) document.getElementById('btnActivateLicense').textContent = t.btnActivateLicense;
+      if (document.getElementById('btnCancelLicense')) document.getElementById('btnCancelLicense').textContent = t.btnCancelLicense;
+      if (document.getElementById('downloadLockedMsg')) document.getElementById('downloadLockedMsg').innerHTML = t.downloadLocked;
+      if (document.getElementById('fullVersionTitle')) document.getElementById('fullVersionTitle').innerHTML = t.fullVersionFeatures;
+      if (document.getElementById('featuresList')) document.getElementById('featuresList').innerHTML = t.featuresList;
+      if (document.getElementById('acceptLicense')) document.getElementById('acceptLicense').textContent = t.btnActivateNow;
+      
+      // Update footer (single line format with separators)
+      const footerPhone = document.getElementById('footerPhone');
+      const footerTelegram = document.getElementById('footerTelegram');
+      const footerFacebook = document.getElementById('footerFacebook');
+      const footerCopyrightLabel = document.getElementById('footerCopyrightLabel');
+      const footerRights = document.getElementById('footerRights');
+      
+      if (footerPhone) footerPhone.innerHTML = t.footerPhone + ' <a href="tel:+8556699313199" style="color:#3b82f6;">+855 66/99 931319</a>';
+      if (footerTelegram) footerTelegram.innerHTML = t.footerTelegram + ' <a href="https://t.me/khemmy99" target="_blank" style="color:#3b82f6;">@khemmy99</a>';
+      if (footerFacebook) footerFacebook.innerHTML = t.footerFacebook + ' <a href="https://facebook.com/KMLOL" target="_blank" style="color:#3b82f6;">facebook.com/KMLOL</a>';
+      if (footerCopyrightLabel) footerCopyrightLabel.textContent = t.footerCopyright;
+      if (footerRights) {
+        const nameText = (lang === 'km') ? 'ខែម មី' : 'Khem My';
+        footerRights.textContent = t.footerRights;
+        // Update copyright section
+        const footerCopyright = document.getElementById('footerCopyright');
+        if (footerCopyright) {
+          footerCopyright.innerHTML = '<b id="footerCopyrightLabel">' + t.footerCopyright + '</b> © 2026 ' + nameText + '. <span id="footerRights">' + t.footerRights + '</span>';
+        }
+      }
+      
+      // Update language button text
       const btnToggle = document.getElementById('langToggle');
       if (btnToggle) {
         btnToggle.textContent = lang === 'en' ? '🌐 ខ្មែរ' : '🌐 English';
@@ -1484,12 +1528,12 @@
     if (langToggleBtn) {
       langToggleBtn.addEventListener('click', () => {
         const newLang = currentLang === 'en' ? 'km' : 'en';
-        currentLang = newLang;
-        localStorage.setItem('kmqr_lang', newLang);
-        // Update button text immediately
-        langToggleBtn.textContent = newLang === 'en' ? '🌐 ខ្មែរ' : '🌐 English';
-        // Update all language content
+        // Update all language content first (this will also set currentLang and localStorage)
         updateLanguage(newLang);
+        // Update button text after
+        langToggleBtn.textContent = newLang === 'en' ? '🌐 ខ្មែរ' : '🌐 English';
+        // Update activation status to refresh activate/deactivate button text
+        updateActivationStatus();
       });
     }
 
@@ -1548,7 +1592,7 @@
     btnGenerate.addEventListener('click', () => {
       console.log('Generate button clicked!');
       if (!elText.value) {
-        alert('Please enter text or URL');
+        alert(translations[currentLang].alertEnterText);
         return;
       }
 
@@ -1700,7 +1744,14 @@
       
       const isActivated = localStorage.getItem('kmqr_app_activated') === 'true';
       if (!isActivated) {
-        alert('🔒 Download is locked in Trial Mode\n\nClick the GREEN ACTIVATE button to unlock all downloads!');
+        // Close the download menu BEFORE showing alert
+        const downloadMenu = document.getElementById('downloadMenu');
+        if (downloadMenu) downloadMenu.style.display = 'none';
+        
+        // Use setTimeout to show alert after menu closes
+        setTimeout(() => {
+          alert(translations[currentLang].alertDownloadLocked);
+        }, 100);
         return;
       }
       
@@ -1881,9 +1932,9 @@
 
     // Initialize
     updateLanguage(currentLang);
+    updateActivationStatus();
     initializeLicense();
     initializeWelcome();
-    updateActivationStatus();
   </script>
 </body>
 </html>
