@@ -14,7 +14,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>KMQR Generator</title>
+  <title>KMQR Generator - QR Code Creator</title>
   <link rel="icon" type="image/png" href="icon.png">
   <link rel="shortcut icon" href="icon.png" type="image/png">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -81,7 +81,7 @@
       let deviceId = localStorage.getItem('kmqr_device_id');
       if (!deviceId) {
         // Generate a simple UUID (RFC4122 v4 compliant)
-        deviceId = 'KM-' + ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+        deviceId = 'KMQR-' + ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
           (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
         );
         localStorage.setItem('kmqr_device_id', deviceId);
@@ -108,7 +108,7 @@
         return;
       }
       
-      if (!licenseCode.startsWith('KM-') && !licenseCode.startsWith('TRIAL-')) {
+      if (!licenseCode.startsWith('KMQR-') && !licenseCode.startsWith('TRIAL-')) {
         alert(translations[currentLang].alertInvalidLicense);
         return;
       }
@@ -751,88 +751,77 @@
   <div class="main-wrapper">
     <div class="container">
       <div class="section">
-      <div class="section-title" id="textLabel">អត្ថបទ ឬ URL</div>
-      <input id="qrText" type="text" placeholder="បញ្ចូលអត្ថបទ, URL, ឬភាសាខ្មែរ…" />
-      
-      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-top: 12px;">
-        <div>
-          <label id="sizeLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">ទំហំ</label>
-          <select id="qrSize">
-            <option value="200">200</option>
-            <option value="256">256</option>
-            <option value="320">320</option>
-            <option value="400">400</option>
-          </select>
+        <div class="section-title" id="textLabel">អត្ថបទ ឬ URL</div>
+        <input id="qrText" type="text" placeholder="បញ្ចូលអត្ថបទ, URL, ឬភាសាខ្មែរ…" />
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-top: 12px;">
+          <div>
+            <label id="sizeLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">ទំហំ</label>
+            <select id="qrSize">
+              <option value="200">200</option>
+              <option value="256">256</option>
+              <option value="320">320</option>
+              <option value="400">400</option>
+            </select>
+          </div>
+          <div>
+            <label id="ecLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">កំរិតកែកំហុស</label>
+            <select id="qrEC">
+              <option value="L" id="ecLow">ទាប</option>
+              <option value="M" selected id="ecMedium">មធ្យម</option>
+              <option value="Q" id="ecQuartile">ខ្ពស់</option>
+              <option value="H" id="ecHigh">ខ្ពស់បំផុត</option>
+            </select>
+          </div>
+          <div>
+            <label id="dpiLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">គុណភាព (DPI)</label>
+            <select id="dpiScale">
+              <option value="1">1×</option>
+              <option value="2" selected>2×</option>
+              <option value="3">3×</option>
+            </select>
+          </div>
+          <div>
+            <label id="roundLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">រូបសញ្ញាមូល</label>
+            <select id="logoRound">
+              <option value="no" id="no">ទេ</option>
+              <option value="yes" selected id="yes">បាទ/ចាស</option>
+            </select>
+          </div>
+        </div>
+        <div class="color-row" style="margin-top: 8px; grid-template-columns: 1fr 1fr 1fr;">
+          <div>
+            <label id="fgLabel">ពណ៌មុខ</label>
+            <input id="qrFG" type="color" value="#000000" />
+          </div>
+          <div>
+            <label id="bgLabel">ពណ៌ខាងក្រោយ</label>
+            <input id="qrBG" type="color" value="#ffffff" />
+          </div>
+          <div>
+            <label id="logoBgLabel">ពណ៌ខាងក្រោយរូបសញ្ញា</label>
+            <input id="logoBg" type="color" value="#ffffff" />
+          </div>
         </div>
         <div>
-          <label id="ecLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">កំរិតកែកំហុស</label>
-          <select id="qrEC">
-            <option value="L" id="ecLow">ទាប</option>
-            <option value="M" selected id="ecMedium">មធ្យម</option>
-            <option value="Q" id="ecQuartile">ខ្ពស់</option>
-            <option value="H" id="ecHigh">ខ្ពស់បំផុត</option>
-          </select>
+          <label id="captionLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">អត្ថបទលើកូដ</label>
+          <input id="overlayText" type="text" placeholder="ឧ. ខែម​ មី" />
         </div>
         <div>
-          <label id="dpiLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">គុណភាព (DPI)</label>
-          <select id="dpiScale">
-            <option value="1">1×</option>
-            <option value="2" selected>2×</option>
-            <option value="3">3×</option>
-          </select>
+          <label id="logoLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">ជ្រើសរើសរូបភាព</label>
+          <button id="logoUploadBtn" class="secondary" style="margin-top: 0;" onclick="document.getElementById('logoUpload').click();">📁 ជ្រើសរូបភាព</button>
+          <input id="logoUpload" type="file" accept="image/*" style="display: none;" onchange="handleLogoUpload(this);" />
+          <div id="logoPreview" class="logo-preview" style="display: none;"></div>
         </div>
-        <div>
-          <label id="roundLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">រូបសញ្ញាមូល</label>
-          <select id="logoRound">
-            <option value="no" id="no">ទេ</option>
-            <option value="yes" selected id="yes">បាទ/ចាស</option>
-          </select>
+        <button class="primary" id="btnGenerate">✨ បង្កើតកូដ QR</button>
+        <button class="ghost" id="btnClear" style="width: 100%; margin-top: 12px;">🗑️ សម្អាត</button>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;">
+          <button class="secondary" id="btnDownload" disabled onclick="var dm = document.getElementById('downloadMenu'); var sm = document.getElementById('shareMenu'); sm.style.display = 'none'; dm.style.display = dm.style.display === 'block' ? 'none' : 'block';">📥 ទាញយក</button>
+          <button class="secondary" id="btnShare" disabled onclick="var sm = document.getElementById('shareMenu'); var dm = document.getElementById('downloadMenu'); dm.style.display = 'none'; sm.style.display = sm.style.display === 'block' ? 'none' : 'block';">📤 ចែករំលែក</button>
         </div>
-      </div>
-      
-      <div class="color-row" style="margin-top: 8px; grid-template-columns: 1fr 1fr 1fr;">
-        <div>
-          <label id="fgLabel">ពណ៌មុខ</label>
-          <input id="qrFG" type="color" value="#000000" />
+        <div class="section" style="margin-top: 24px;">
+          <div id="previewLabel" style="font-size: 14px; font-weight: 700; color: #cbd5e1; margin-bottom: 12px;">មើលមុន</div>
+          <div id="qrPreview"><p id="previewHint">បញ្ចូលអត្ថបទ ហើយចុចបង្កើត</p></div>
         </div>
-        <div>
-          <label id="bgLabel">ពណ៌ខាងក្រោយ</label>
-          <input id="qrBG" type="color" value="#ffffff" />
-        </div>
-        <div>
-          <label id="logoBgLabel">ពណ៌ខាងក្រោយរូបសញ្ញា</label>
-          <input id="logoBg" type="color" value="#ffffff" />
-        </div>
-      </div>
-
-      <div>
-        <label id="captionLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">អត្ថបទលើកូដ</label>
-        <input id="overlayText" type="text" placeholder="ឧ. ខែម​ មី" />
-      </div>
-
-      <div>
-        <label id="logoLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">ជ្រើសរើសរូបភាព</label>
-        <button id="logoUploadBtn" class="secondary" style="margin-top: 0;" onclick="document.getElementById('logoUpload').click();">📁 ជ្រើសរូបភាព</button>
-        <input id="logoUpload" type="file" accept="image/*" style="display: none;" onchange="handleLogoUpload(this);" />
-        <div id="logoPreview" class="logo-preview" style="display: none;"></div>
-      </div>
-      
-      <button class="primary" id="btnGenerate">✨ បង្កើតកូដ QR</button>
-      
-      <button class="ghost" id="btnClear" style="width: 100%; margin-top: 12px;">🗑️ សម្អាត</button>
-      
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;">
-        <button class="secondary" id="btnDownload" disabled onclick="var dm = document.getElementById('downloadMenu'); var sm = document.getElementById('shareMenu'); sm.style.display = 'none'; dm.style.display = dm.style.display === 'block' ? 'none' : 'block';">📥 ទាញយក</button>
-        <button class="secondary" id="btnShare" disabled onclick="var sm = document.getElementById('shareMenu'); var dm = document.getElementById('downloadMenu'); dm.style.display = 'none'; sm.style.display = sm.style.display === 'block' ? 'none' : 'block';">📤 ចែករំលែក</button>
-      </div>
-      </div>
-    </div>
-
-    <!-- Right side: Preview only -->
-    <div class="container">
-      <div class="section">
-      <div id="previewLabel" style="font-size: 14px; font-weight: 700; color: #cbd5e1; margin-bottom: 12px;">មើលមុន</div>
-      <div id="qrPreview"><p id="previewHint">បញ្ចូលអត្ថបទ ហើយចុចបង្កើត</p></div>
       </div>
     </div>
   </div>
@@ -868,7 +857,7 @@
       <button class="close-btn" style="position: absolute; top: 18px; right: 18px; font-size: 36px; color: #94a3b8; background: none; border: none; cursor: pointer;" onclick="document.getElementById('helpModal').classList.remove('active'); document.getElementById('helpModal').style.display = 'none';">&times;</button>
       <h2 id="helpTitle" style="color: #22d3a9; font-size: 32px; font-weight: 700; margin: 0 0 18px 0; text-align: center;">ជំនួយ - KMQR Generator Pro</h2>
       <div id="helpContent" style="font-size:16px;line-height:1.7;color:#e2e8f0;">
-        <p><strong>📖 របៀបប្រើប្រាស់៖</strong></p><p>1. បញ្ចូលអត្ថបទ ឬ URL នៅក្នុងចៀនលិខិត<br>2. កែសម្រួលទំហំ ពណ៌ កំរិតកែកំហុស<br>3. បន្ថែមរូបសញ្ញា ហើយអត្ថបទលើកូដ (ទៈចេត្ត)<br>4. ចុច "បង្កើត QR" ដើម្បីមើលកូដរបស់អ្នក<br>5. ទាញយកជា PNG, JPG, ឬ PDF</p><hr style="margin: 16px 0; border: none; border-top: 1px solid #475569;"><p><strong>✨ មុខងារ៖</strong><br>• បង្កើតកូដ QR ក្រៅប្រព័ន្ធដោយគ្មានអ៊ីនទឺណេត<br>• បន្ថែមរូបសញ្ញា ហើយអត្ថបទលើកូដ<br>• ទាញយកគុណភាពខ្ពស់ (1x, 2x, 3x)<br>• គាំទ្រភាសាអង្គ្លេស ហើយខ្មែរ<br>• ម៉ូដសាកល្បង & ដោហសោលទំណាមទៅ<br>• ចែករំលែកលើប្រព័ន្ធសង្កម</p><hr style="margin: 16px 0; border: none; border-top: 1px solid #475569;"><p><strong>🔓 ស្វែងរកដូកប្រើប្រាស់៖</strong><br>📧 <a href="mailto:my.khem.mathst@gmail.com" style="color: #3b82f6;">my.khem.mathst@gmail.com</a><br>📱 <a href="tel:+85566999313199" style="color: #3b82f6;">+855 66/99 931319</a><br>💬 <a href="https://t.me/khemmy99" target="_blank" style="color: #3b82f6;">Telegram: @khemmy99</a></p>
+        <p><strong>📖 របៀបប្រើប្រាស់៖</strong></p><p>1. បញ្ចូលអត្ថបទ ឬ URL នៅក្នុងចៀនលិខិត<br>2. កែសម្រួលទំហំ ពណ៌ កំរិតកែកំហុស<br>3. បន្ថែមរូបសញ្ញា ហើយអត្ថបទលើកូដ (ទៈចេត្ត)<br>4. ចុច "បង្កើត QR" ដើម្បីមើលកូដរបស់អ្នក<br>5. ទាញយកជា PNG, JPG, ឬ PDF</p><hr style="margin: 16px 0; border: none; border-top: 1px solid #475569;"><p><strong>✨ មុខងារ៖</strong><br>• បង្កើតកូដ QR ក្រៅប្រព័ន្ធដោយគ្មានអ៊ីនទឺណេត<br>• បន្ថែមរូបសញ្ញា ហើយអត្ថបទលើកូដ<br>• ទាញយកគុណភាពខ្ពស់ (1x, 2x, 3x)<br>• គាំទ្រភាសាអង្គ្លេស ហើយខ្មែរ<br>• ម៉ូដសាកល្បង & ដោហសោលទំណាមទៅ<br>• ចែករំលែកលើប្រព័ន្ធសង្កម</p><hr style="margin: 16px 0; border: none; border-top: 1px solid #475569;"><p><strong>🔓 ស្វែងរកលីសាងស់៖</strong><br>📧 <a href="mailto:my.khem.mathst@gmail.com" style="color: #3b82f6;">my.khem.mathst@gmail.com</a><br>📱 <a href="tel:+85566999313199" style="color: #3b82f6;">+855 66/99 931319</a><br>💬 <a href="https://t.me/khemmy99" target="_blank" style="color: #3b82f6;">Telegram: @khemmy99</a></p>
       </div>
     </div>
   </div>
@@ -1277,7 +1266,7 @@
         logoLabel: 'Choose Logo',
         logoUploadBtn: '📁 Select Image',
         previewLabel: 'Preview',
-        btnGenerate: '✨Generate QR',
+        btnGenerate: 'Generate QR',
         btnDownload: '📥 Download',
         btnClear: 'Clear',
         btnHelp: 'Help',
@@ -1314,7 +1303,7 @@
         featuresList: '✓ Download PNG format<br>✓ Download JPG format<br>✓ Download PDF format<br>✓ Unlimited QR codes<br>✓ All customization options',
         btnActivateNow: '🎉 Activate Now',
         alertEnterLicense: '❌ Please enter a license code',
-        alertInvalidLicense: '❌ Invalid license code numbers.​ Please contact develpoer for license code or use trail',
+        alertInvalidLicense: '❌ Invalid license code format.\\n\\nValid codes start with KMQR- or TRIAL-\\n\\nExample: KMQR-ABC123',
         helpTitle: 'Help',
         helpContent: '<p><strong>📖 How to Use:</strong></p><p>1. Enter text or URL in the input field<br>2. Customize size, colors, error correction<br>3. Add logo (optional)<br>4. Click "Generate QR" to create the code<br>5. Download as PNG, JPG, or PDF</p><hr style="margin: 16px 0; border: none; border-top: 1px solid #475569;"><p><strong>✨ Features:</strong><br>• Offline QR code generation<br>• Logo overlay with customizable background<br>• High-quality DPI export (1x, 2x, 3x)<br>• English & Khmer bilingual support<br>• Trial Mode & License Activation<br>• Social media sharing</p><hr style="margin: 16px 0; border: none; border-top: 1px solid #475569;"><p><strong>🔓 Get License:</strong><br>📧 <a href="mailto:my.khem.mathst@gmail.com" style="color: #3b82f6;">my.khem.mathst@gmail.com</a><br>📱 <a href="tel:+85566999313199" style="color: #3b82f6;">+855 66/99 931319</a><br>💬 <a href="https://t.me/khemmy99" target="_blank" style="color: #3b82f6;">Telegram: @khemmy99</a></p>',
         aboutTitle: 'About',
@@ -1349,7 +1338,7 @@
         btnGenerate: '✨ បង្កើតកូដ QR',
         btnDownload: '📥 ទាញយក',
         btnClear: 'សម្អាត',
-        btnHelp: '📖ជំនួយ',
+        btnHelp: 'ជំនួយ',
         btnAbout: 'អំពីកម្មវិធី',
         btnShare: '📤 ចែករំលែក',
         updateBtn: '🔄 កំណែកម្មវិធី',
@@ -1368,7 +1357,7 @@
         welcomeSubtitle: 'បង្កើតកូដ QR ជាមួយមុខងារវិជ្ជាជីវៈ',
         btnEnterLicense: '✅ បញ្ចូលលេខកូដ',
         btnSkipTrial: '⏭️ សាកល្បងឥតគិតថ្លៃ',
-        trialModeInfo: 'ម៉ូដសាកល្បង៖ បង្កើត និងកែសម្រួល QR ដោយសេរី<br>កូដប្រើប្រាស់ពេញលេញ៖ ដោះសោទាញយកគ្រប់ទម្រង់',
+        trialModeInfo: 'ម៉ូដសាកល្បង៖ បង្កើត និងកែសម្រួល QR ដោយសេរី<br>លីសិន្សពេញលេញ៖ ដោះសោទាញយកគ្រប់ទម្រង់',
         licenseModalTitle: '🔓 បញ្ចូលលេខកូដ',
         licenseInstructions: '<strong>បញ្ចូលលេខកូដរបស់អ្នកខាងក្រោមដើម្បីដោះសោមុខងារពេញលេញ៖</strong>',
         licensePlaceholder: 'បញ្ចូលលេខកូដរបស់អ្នកនៅទីនេះ...',
@@ -1383,14 +1372,14 @@
         featuresList: '✓ ទាញយកទម្រង់ PNG<br>✓ ទាញយកទម្រង់ JPG<br>✓ ទាញយកទម្រង់ PDF<br>✓ កូដ QR គ្មានដែនកំណត់<br>✓ ជម្រើសកែសម្រួលទាំងអស់',
         btnActivateNow: '🎉 ធ្វើឱ្យសកម្មឥឡូវ',
         alertEnterLicense: '❌ សូមបញ្ចូលលេខកូដ',
-        alertInvalidLicense: '❌ លេខកូដមិនត្រឹមត្រូវ។ សូមទាក់ទងអ្នកអភិវឌ្ឍកម្មវិធីដើម្បីទទួលសិទ្ធិប្រើប្រាស់ពេញលេញ- ឬប្រើសាកល្បង',
+        alertInvalidLicense: '❌ ទម្រង់លេខកូដមិនត្រឹមត្រូវ។\\n\\nលេខកូដត្រឹមត្រូវចាប់ផ្តើមដោយ KMQR- ឬ TRIAL-\\n\\nឧទាហរណ៍៖ KMQR-ABC123',
         helpTitle: 'ណែនាំពីរបៀបប្រើប្រាស់',
         helpContent: '<p><strong>📖 របៀបប្រើប្រាស់៖</strong></p><p>១. បញ្ចូលអត្ថបទ ឬ URL នៅក្នុងវាលបញ្ចូល<br>២. កែលម្អទំហំ ពណ៌ និងកម្រិតកែកំហុស<br>៣. បន្ថែមរូបសញ្ញា(បន្ថែម)<br>៤. ចុច "បង្កើតកូដ QR" ដើម្បីបង្កើតលេខកូដ<br>៥. ទាញយកជា PNG, JPG ឬ PDF</p><hr style="margin: 16px 0; border: none; border-top: 1px solid #475569;"><p><strong>✨ លក្ខណៈពិសេស៖</strong><br>• បង្កើតលេខកូដ QR ដោយស្វ័យប្រវត្តិ<br>• រូបសញ្ញាលើស្រទាប់ដែលបានលម្អ<br>• នាំចេញគុណភាពខ្ពស់ DPI (1x, 2x, 3x)<br>• ប្រើបានពីរភាសារ(អង់គ្លេស & ខ្មែរ)<br>• កម្មវិធីសាកល្បង និងកម្មវិធីទិញកម្មសិទ្ធិ<br>• ចែករំលែកលើមេឌៀ</p><hr style="margin: 16px 0; border: none; border-top: 1px solid #475569;"><p><strong>🔓 ទទួលសិទ្ធិប្រើប្រាស់៖</strong><br>📧 <a href="mailto:my.khem.mathst@gmail.com" style="color: #3b82f6;">my.khem.mathst@gmail.com</a><br>📱 <a href="tel:+85566999313199" style="color: #3b82f6;">+855 66/99 931319</a><br>💬 <a href="https://t.me/khemmy99" target="_blank" style="color: #3b82f6;">Telegram: @khemmy99</a></p>',
         aboutTitle: 'អំពីកម្មវិធី',
         version: 'ជំនាន់ ១.០.៨',
         developerLabel: '👨‍💻 អ្នកបង្កើត៖',
         developer: 'ខែម មី<br><em>អ្នកអភិវឌ្ឍកម្មវិធី</em><br><em>ឯកទេស QR Code</em>',
-        deviceIdLabel: 'លេខសម្គាល់ឧបករណ៍ (សម្រាប់កូដប្រើប្រាស់):',
+        deviceIdLabel: 'លេខសម្គាល់ឧបករណ៍ (សម្រាប់លីសិន្ស):',
       }
     };
 
