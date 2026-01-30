@@ -234,15 +234,16 @@
     }
 
     .main-wrapper {
-      max-width: 1400px;
-      margin: 80px auto 20px auto;
+      max-width: 700px;
+      margin: 40px auto 20px auto;
       display: flex;
+      flex-direction: column;
       gap: 24px;
       padding: 0 8px;
     }
 
     .container {
-      flex: 1;
+      width: 100%;
       background: #1e293b;
       border-radius: 0;
       padding: 24px;
@@ -736,14 +737,16 @@
   </div>
 
   <!-- Header with Title and Buttons -->
-  <div style="background: #1e293b; border-bottom: 1px solid #334155; padding: 6px 10px; position: sticky; top: 0; z-index: 102; display: flex; justify-content: space-between; align-items: center; gap: 6px; flex-wrap: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
-    <h1 id="title" style="margin: 0; font-size: 20px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; white-space: nowrap; flex-shrink: 0; font-weight: 700; letter-spacing: 0.5px; line-height: 1; display: flex; align-items: center; height: 40px;">កម្មវិធីបង្កើត QR</h1>
-    <div style="display: flex; gap: 4px; align-items: center; height: 40px;">
-      <button id="activateBtn" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 4px 4px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; box-shadow: 0 2px 6px rgba(16,185,129,0.25); min-height: 28px; display: flex; align-items: center; justify-content: center; line-height: 1;" onclick="document.getElementById('helpModal').classList.remove('active'); document.getElementById('helpModal').style.display = 'none'; document.getElementById('aboutModal').classList.remove('active'); document.getElementById('aboutModal').style.display = 'none'; document.getElementById('licenseModal').classList.add('active'); document.getElementById('licenseModal').style.display = 'flex';">🔓 ធ្វើឱ្យសកម្ម</button>
-        <button id="btnHelp2" style="background: #475569; color: #e2e8f0; border: 1px solid #64748b; padding: 4px 4px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; min-height: 28px; display: flex; align-items: center; justify-content: center; line-height: 1;" onclick="document.getElementById('helpModal').classList.add('active'); document.getElementById('helpModal').style.display = 'flex'; document.getElementById('aboutModal').classList.remove('active'); document.getElementById('aboutModal').style.display = 'none'; document.getElementById('licenseModal').classList.remove('active'); document.getElementById('licenseModal').style.display = 'none';"><span style="display: flex; align-items: center; gap: 4px;"><img src="icon.png" alt="Help" style="height: 16px; width: 16px; vertical-align: middle;"> <span id="btnHelp2Text">ជំនួយ</span></span></button>
-      <button id="btnAbout2" style="background: #475569; color: #e2e8f0; border: 1px solid #64748b; padding: 4px 4px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; min-height: 28px; display: flex; align-items: center; justify-content: center; line-height: 1;" onclick="document.getElementById('aboutModal').classList.add('active'); document.getElementById('aboutModal').style.display = 'flex'; document.getElementById('helpModal').classList.remove('active'); document.getElementById('helpModal').style.display = 'none'; document.getElementById('licenseModal').classList.remove('active'); document.getElementById('licenseModal').style.display = 'none'; (function(){var lang=localStorage.getItem('kmqr_lang')||'km';var t=window.translations&&window.translations[lang];if(t){var aboutHtml = '<div style=\'text-align:center;\'><b>'+t.title+'</b></div>';aboutHtml += '<div style=\'margin-top:8px;font-size:15px;\'><b>'+t.version+'</b><br><span>'+t.developerLabel+'</span> <span>'+t.developer+'</span></div>';document.getElementById('aboutContent').innerHTML=aboutHtml;}})();">📖 អំពី</button>
-      <button id="langToggle" style="background: #475569; color: #e2e8f0; border: 1px solid #64748b; padding: 4px 4px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; min-height: 28px; display: flex; align-items: center; justify-content: center; line-height: 1;">🌐 English</button>
-      <button id="updateCheckBtn" style="background: #64748b; color: #e2e8f0; border: 1px solid #94a3b8; padding: 4px 4px; border-radius: 4px; font-size: 10px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; min-height: 28px; display: flex; align-items: center; justify-content: center; line-height: 1;">🔄 កំណែកម្មវិធី</button>
+  <div style="background: #1e293b; border-bottom: 1px solid #334155; padding: 8px 10px 4px 10px; position: sticky; top: 0; z-index: 102; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
+    <div style="display: flex; flex-direction: column; align-items: center; gap: 8px;">
+      <h1 id="title" style="margin: 0; font-size: 24px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; white-space: nowrap; font-weight: 700; letter-spacing: 0.5px; line-height: 1; text-align: center;">KMQR Generator</h1>
+      <div style="display: flex; flex-direction: row; gap: 8px; justify-content: center; margin-top: 8px;">
+        <button id="activateBtn" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 8px 12px; border-radius: 4px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; box-shadow: 0 2px 6px rgba(16,185,129,0.25); min-height: 36px; display: flex; align-items: center; justify-content: center; line-height: 1;" onclick="document.getElementById('helpModal').classList.remove('active'); document.getElementById('helpModal').style.display = 'none'; document.getElementById('aboutModal').classList.remove('active'); document.getElementById('aboutModal').style.display = 'none'; document.getElementById('licenseModal').classList.add('active'); document.getElementById('licenseModal').style.display = 'flex';">🔓 Activate</button>
+        <button id="btnHelp2" style="background: #475569; color: #e2e8f0; border: 1px solid #64748b; padding: 8px 12px; border-radius: 4px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; min-height: 36px; display: flex; align-items: center; justify-content: center; line-height: 1;" onclick="document.getElementById('helpModal').classList.add('active'); document.getElementById('helpModal').style.display = 'flex'; document.getElementById('aboutModal').classList.remove('active'); document.getElementById('aboutModal').style.display = 'none'; document.getElementById('licenseModal').classList.remove('active'); document.getElementById('licenseModal').style.display = 'none';"><span style="display: flex; align-items: center; gap: 4px;"><img src="icon.png" alt="Help" style="height: 16px; width: 16px; vertical-align: middle;"> <span id="btnHelp2Text">Help</span></span></button>
+        <button id="btnAbout2" style="background: #475569; color: #e2e8f0; border: 1px solid #64748b; padding: 8px 12px; border-radius: 4px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; min-height: 36px; display: flex; align-items: center; justify-content: center; line-height: 1;" onclick="document.getElementById('aboutModal').classList.add('active'); document.getElementById('aboutModal').style.display = 'flex'; document.getElementById('helpModal').classList.remove('active'); document.getElementById('helpModal').style.display = 'none'; document.getElementById('licenseModal').classList.remove('active'); document.getElementById('licenseModal').style.display = 'none'; (function(){var lang=localStorage.getItem('kmqr_lang')||'km';var t=window.translations&&window.translations[lang];if(t){var aboutHtml = '<div style=\'text-align:center;\'><b>'+t.title+'</b></div>';aboutHtml += '<div style=\'margin-top:8px;font-size:15px;\'><b>'+t.version+'</b><br><span>'+t.developerLabel+'</span> <span>'+t.developer+'</span></div>';document.getElementById('aboutContent').innerHTML=aboutHtml;}})();">About</button>
+        <button id="langToggle" style="background: #475569; color: #e2e8f0; border: 1px solid #64748b; padding: 8px 12px; border-radius: 4px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; min-height: 36px; display: flex; align-items: center; justify-content: center; line-height: 1;">🌐 English</button>
+        <button id="updateCheckBtn" style="background: #64748b; color: #e2e8f0; border: 1px solid #94a3b8; padding: 8px 12px; border-radius: 4px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; min-height: 36px; display: flex; align-items: center; justify-content: center; line-height: 1;">🔄 Update</button>
+      </div>
     </div>
   </div>
   </div>
@@ -751,77 +754,89 @@
   <div class="main-wrapper">
     <div class="container">
       <div class="section">
-        <div class="section-title" id="textLabel">អត្ថបទ ឬ URL</div>
-        <input id="qrText" type="text" placeholder="បញ្ចូលអត្ថបទ, URL, ឬភាសាខ្មែរ…" />
-        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-top: 12px;">
-          <div>
-            <label id="sizeLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">ទំហំ</label>
-            <select id="qrSize">
-              <option value="200">200</option>
-              <option value="256">256</option>
-              <option value="320">320</option>
-              <option value="400">400</option>
-            </select>
-          </div>
-          <div>
-            <label id="ecLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">កំរិតកែកំហុស</label>
-            <select id="qrEC">
-              <option value="L" id="ecLow">ទាប</option>
-              <option value="M" selected id="ecMedium">មធ្យម</option>
-              <option value="Q" id="ecQuartile">ខ្ពស់</option>
-              <option value="H" id="ecHigh">ខ្ពស់បំផុត</option>
-            </select>
-          </div>
-          <div>
-            <label id="dpiLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">គុណភាព (DPI)</label>
-            <select id="dpiScale">
-              <option value="1">1×</option>
-              <option value="2" selected>2×</option>
-              <option value="3">3×</option>
-            </select>
-          </div>
-          <div>
-            <label id="roundLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">រូបសញ្ញាមូល</label>
-            <select id="logoRound">
-              <option value="no" id="no">ទេ</option>
-              <option value="yes" selected id="yes">បាទ/ចាស</option>
-            </select>
-          </div>
-        </div>
-        <div class="color-row" style="margin-top: 8px; grid-template-columns: 1fr 1fr 1fr;">
-          <div>
-            <label id="fgLabel">ពណ៌មុខ</label>
-            <input id="qrFG" type="color" value="#000000" />
-          </div>
-          <div>
-            <label id="bgLabel">ពណ៌ខាងក្រោយ</label>
-            <input id="qrBG" type="color" value="#ffffff" />
-          </div>
-          <div>
-            <label id="logoBgLabel">ពណ៌ខាងក្រោយរូបសញ្ញា</label>
-            <input id="logoBg" type="color" value="#ffffff" />
-          </div>
+      <div class="section-title" id="textLabel">អត្ថបទ ឬ URL</div>
+      <input id="qrText" type="text" placeholder="បញ្ចូលអត្ថបទ, URL, ឬភាសាខ្មែរ…" />
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-top: 12px;">
+        <div>
+          <label id="sizeLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">ទំហំ</label>
+          <select id="qrSize">
+            <option value="200">200</option>
+            <option value="256">256</option>
+            <option value="320">320</option>
+            <option value="400">400</option>
+          </select>
         </div>
         <div>
-          <label id="captionLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">អត្ថបទលើកូដ</label>
-          <input id="overlayText" type="text" placeholder="ឧ. ខែម​ មី" />
+          <label id="ecLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">កំរិតកែកំហុស</label>
+          <select id="qrEC">
+            <option value="L" id="ecLow">ទាប</option>
+            <option value="M" selected id="ecMedium">មធ្យម</option>
+            <option value="Q" id="ecQuartile">ខ្ពស់</option>
+            <option value="H" id="ecHigh">ខ្ពស់បំផុត</option>
+          </select>
         </div>
         <div>
-          <label id="logoLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">ជ្រើសរើសរូបភាព</label>
-          <button id="logoUploadBtn" class="secondary" style="margin-top: 0;" onclick="document.getElementById('logoUpload').click();">📁 ជ្រើសរូបភាព</button>
-          <input id="logoUpload" type="file" accept="image/*" style="display: none;" onchange="handleLogoUpload(this);" />
-          <div id="logoPreview" class="logo-preview" style="display: none;"></div>
+          <label id="dpiLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">គុណភាព (DPI)</label>
+          <select id="dpiScale">
+            <option value="1">1×</option>
+            <option value="2" selected>2×</option>
+            <option value="3">3×</option>
+          </select>
         </div>
-        <button class="primary" id="btnGenerate">✨ បង្កើតកូដ QR</button>
-        <button class="ghost" id="btnClear" style="width: 100%; margin-top: 12px;">🗑️ សម្អាត</button>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;">
-          <button class="secondary" id="btnDownload" disabled onclick="var dm = document.getElementById('downloadMenu'); var sm = document.getElementById('shareMenu'); sm.style.display = 'none'; dm.style.display = dm.style.display === 'block' ? 'none' : 'block';">📥 ទាញយក</button>
-          <button class="secondary" id="btnShare" disabled onclick="var sm = document.getElementById('shareMenu'); var dm = document.getElementById('downloadMenu'); dm.style.display = 'none'; sm.style.display = sm.style.display === 'block' ? 'none' : 'block';">📤 ចែករំលែក</button>
+        <div>
+          <label id="roundLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">រូបសញ្ញាមូល</label>
+          <select id="logoRound">
+            <option value="no" id="no">ទេ</option>
+            <option value="yes" selected id="yes">បាទ/ចាស</option>
+          </select>
         </div>
-        <div class="section" style="margin-top: 24px;">
-          <div id="previewLabel" style="font-size: 14px; font-weight: 700; color: #cbd5e1; margin-bottom: 12px;">មើលមុន</div>
-          <div id="qrPreview"><p id="previewHint">បញ្ចូលអត្ថបទ ហើយចុចបង្កើត</p></div>
+      </div>
+      
+      <div class="color-row" style="margin-top: 8px; grid-template-columns: 1fr 1fr 1fr;">
+        <div>
+          <label id="fgLabel">ពណ៌មុខ</label>
+          <input id="qrFG" type="color" value="#000000" />
         </div>
+        <div>
+          <label id="bgLabel">ពណ៌ខាងក្រោយ</label>
+          <input id="qrBG" type="color" value="#ffffff" />
+        </div>
+        <div>
+          <label id="logoBgLabel">ពណ៌ខាងក្រោយរូបសញ្ញា</label>
+          <input id="logoBg" type="color" value="#ffffff" />
+        </div>
+      </div>
+
+      <div>
+        <label id="captionLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">អត្ថបទលើកូដ</label>
+        <input id="overlayText" type="text" placeholder="ឧ. ខែម​ មី" />
+      </div>
+
+      <div>
+        <label id="logoLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">ជ្រើសរើសរូបភាព</label>
+        <button id="logoUploadBtn" class="secondary" style="margin-top: 0;" onclick="document.getElementById('logoUpload').click();">📁 ជ្រើសរូបភាព</button>
+        <input id="logoUpload" type="file" accept="image/*" style="display: none;" onchange="handleLogoUpload(this);" />
+        <div id="logoPreview" class="logo-preview" style="display: none;"></div>
+      </div>
+      
+      <button class="primary" id="btnGenerate">✨ បង្កើតកូដ QR</button>
+      
+      <button class="ghost" id="btnClear" style="width: 100%; margin-top: 12px;">🗑️ សម្អាត</button>
+      
+      <!-- ...existing code... -->
+      </div>
+    </div>
+
+    <!-- Right side: Preview only -->
+    <div class="container">
+      <div class="section">
+      <div id="previewLabel" style="font-size: 14px; font-weight: 700; color: #cbd5e1; margin-bottom: 12px;">មើលមុន</div>
+      <div id="qrPreview"><p id="previewHint">បញ្ចូលអត្ថបទ ហើយចុចបង្កើត</p></div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;">
+        <button class="secondary" id="btnDownload" disabled onclick="var dm = document.getElementById('downloadMenu'); var sm = document.getElementById('shareMenu'); sm.style.display = 'none'; dm.style.display = dm.style.display === 'block' ? 'none' : 'block';">📥 ទាញយក</button>
+        <button class="secondary" id="btnShare" disabled onclick="var sm = document.getElementById('shareMenu'); var dm = document.getElementById('downloadMenu'); dm.style.display = 'none'; sm.style.display = sm.style.display === 'block' ? 'none' : 'block';">📤 ចែករំលែក</button>
+      </div>
       </div>
     </div>
   </div>
