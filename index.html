@@ -156,6 +156,29 @@
     };
   </script>
   <style>
+        .main-wrapper {
+          display: block !important;
+          width: 100% !important;
+          max-width: 100vw !important;
+        }
+        .main-wrapper > .container {
+          display: block !important;
+          width: 100% !important;
+          max-width: 100vw !important;
+          margin: 0 auto 18px auto !important;
+        }
+        /* Remove any flex/grid from containers */
+        .main-wrapper, .container, .main-wrapper > .container {
+          flex-direction: unset !important;
+          flex-wrap: unset !important;
+          align-items: unset !important;
+          justify-content: unset !important;
+          display: block !important;
+        }
+    .main-wrapper > .container {
+      display: block !important;
+      width: 100%;
+    }
     * {
       margin: 0;
       padding: 0;
@@ -768,88 +791,79 @@
   <div class="main-wrapper">
     <div class="container">
       <div class="section">
-      <div class="section-title" id="textLabel">អត្ថបទ ឬ URL</div>
-      <input id="qrText" type="text" placeholder="បញ្ចូលអត្ថបទ, URL, ឬភាសាខ្មែរ…" />
-      
-      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-top: 12px;">
-        <div>
-          <label id="sizeLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">ទំហំ</label>
-          <select id="qrSize">
-            <option value="200">200</option>
-            <option value="256">256</option>
-            <option value="320">320</option>
-            <option value="400">400</option>
-          </select>
+        <div class="section-title" id="textLabel">អត្ថបទ ឬ URL</div>
+        <input id="qrText" type="text" placeholder="បញ្ចូលអត្ថបទ, URL, ឬភាសាខ្មែរ…" />
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 8px; margin-top: 12px;">
+          <div>
+            <label id="sizeLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">ទំហំ</label>
+            <select id="qrSize">
+              <option value="200">200</option>
+              <option value="256">256</option>
+              <option value="320">320</option>
+              <option value="400">400</option>
+            </select>
+          </div>
+          <div>
+            <label id="ecLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">កំរិតកែកំហុស</label>
+            <select id="qrEC">
+              <option value="L" id="ecLow">ទាប</option>
+              <option value="M" selected id="ecMedium">មធ្យម</option>
+              <option value="Q" id="ecQuartile">ខ្ពស់</option>
+              <option value="H" id="ecHigh">ខ្ពស់បំផុត</option>
+            </select>
+          </div>
+          <div>
+            <label id="dpiLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">គុណភាព (DPI)</label>
+            <select id="dpiScale">
+              <option value="1">1×</option>
+              <option value="2" selected>2×</option>
+              <option value="3">3×</option>
+            </select>
+          </div>
+          <div>
+            <label id="roundLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">រូបសញ្ញាមូល</label>
+            <select id="logoRound">
+              <option value="no" id="no">ទេ</option>
+              <option value="yes" selected id="yes">បាទ/ចាស</option>
+            </select>
+          </div>
+        </div>
+        <div class="color-row" style="margin-top: 12px; grid-template-columns: 1fr 1fr; gap: 10px; align-items: stretch;">
+          <div>
+            <label id="fgLabel">ពណ៌មុខ</label>
+            <input id="qrFG" type="color" value="#000000" />
+          </div>
+          <div>
+            <label id="bgLabel">ពណ៌ខាងក្រោយ</label>
+            <input id="qrBG" type="color" value="#ffffff" />
+          </div>
+        </div>
+        <div class="color-row" style="margin-top: 12px; grid-template-columns: 1fr; gap: 10px; align-items: stretch;">
+          <div>
+            <label id="logoBgLabel">ពណ៌ខាងក្រោយរូបសញ្ញា</label>
+            <input id="logoBg" type="color" value="#ffffff" />
+          </div>
         </div>
         <div>
-          <label id="ecLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">កំរិតកែកំហុស</label>
-          <select id="qrEC">
-            <option value="L" id="ecLow">ទាប</option>
-            <option value="M" selected id="ecMedium">មធ្យម</option>
-            <option value="Q" id="ecQuartile">ខ្ពស់</option>
-            <option value="H" id="ecHigh">ខ្ពស់បំផុត</option>
-          </select>
+          <label id="captionLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">អត្ថបទលើកូដ</label>
+          <input id="overlayText" type="text" placeholder="ឧ. ខែម​ មី" />
         </div>
         <div>
-          <label id="dpiLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">គុណភាព (DPI)</label>
-          <select id="dpiScale">
-            <option value="1">1×</option>
-            <option value="2" selected>2×</option>
-            <option value="3">3×</option>
-          </select>
+          <label id="logoLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">ជ្រើសរើសរូបភាព</label>
+          <button id="logoUploadBtn" class="secondary" style="margin-top: 0;" onclick="document.getElementById('logoUpload').click();">📁 ជ្រើសរូបភាព</button>
+          <input id="logoUpload" type="file" accept="image/*" style="display: none;" onchange="handleLogoUpload(this);" />
+          <div id="logoPreview" class="logo-preview" style="display: none;"></div>
         </div>
-        <div>
-          <label id="roundLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">រូបសញ្ញាមូល</label>
-          <select id="logoRound">
-            <option value="no" id="no">ទេ</option>
-            <option value="yes" selected id="yes">បាទ/ចាស</option>
-          </select>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; align-items: stretch;">
+          <button class="primary" id="btnGenerate" style="min-height: 38px; height: 100%;">✨ បង្កើតកូដ QR</button>
+          <button class="ghost" id="btnClear" style="min-height: 38px; height: 100%;">🗑️ សម្អាត</button>
         </div>
-      </div>
-      
-      <div class="color-row" style="margin-top: 12px; grid-template-columns: 1fr 1fr; gap: 10px; align-items: stretch;">
-        <div>
-          <label id="fgLabel">ពណ៌មុខ</label>
-          <input id="qrFG" type="color" value="#000000" />
-        </div>
-        <div>
-          <label id="bgLabel">ពណ៌ខាងក្រោយ</label>
-          <input id="qrBG" type="color" value="#ffffff" />
-        </div>
-	</div>
-
-  <div class="color-row" style="margin-top: 12px; grid-template-columns: 1fr; gap: 10px; align-items: stretch;">
-        <div>
-          <label id="logoBgLabel">ពណ៌ខាងក្រោយរូបសញ្ញា</label>
-          <input id="logoBg" type="color" value="#ffffff" />
-        </div>
-      </div>
-      <div>
-        <label id="captionLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">អត្ថបទលើកូដ</label>
-        <input id="overlayText" type="text" placeholder="ឧ. ខែម​ មី" />
-      </div>
-
-      <div>
-        <label id="logoLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">ជ្រើសរើសរូបភាព</label>
-        <button id="logoUploadBtn" class="secondary" style="margin-top: 0;" onclick="document.getElementById('logoUpload').click();">📁 ជ្រើសរូបភាព</button>
-        <input id="logoUpload" type="file" accept="image/*" style="display: none;" onchange="handleLogoUpload(this);" />
-        <div id="logoPreview" class="logo-preview" style="display: none;"></div>
-      </div>
-      
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; align-items: stretch;">
-        <button class="primary" id="btnGenerate" style="min-height: 38px; height: 100%;">✨ បង្កើតកូដ QR</button>
-        <button class="ghost" id="btnClear" style="min-height: 38px; height: 100%;">🗑️ សម្អាត</button>
-      </div>
-      
-      <!-- ...existing code... -->
       </div>
     </div>
-
-    <!-- Right side: Preview only -->
     <div class="container">
       <div class="section">
-      <div id="previewLabel" style="font-size: 14px; font-weight: 700; color: #cbd5e1; margin-bottom: 12px;">មើលមុន</div>
-      <div id="qrPreview"><p id="previewHint">បញ្ចូលអត្ថបទ ហើយចុចបង្កើត</p></div>
+        <div id="previewLabel" style="font-size: 14px; font-weight: 700; color: #cbd5e1; margin-bottom: 12px;">មើលមុន</div>
+        <div id="qrPreview"><p id="previewHint">បញ្ចូលអត្ថបទ ហើយចុចបង្កើត</p></div>
       </div>
     </div>
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px;">
