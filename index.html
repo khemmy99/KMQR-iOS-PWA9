@@ -13,6 +13,13 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Hanuman:wght@400;700&display=swap" rel="stylesheet">
   <style>
+        .header-bar > div {
+          margin-top: 0 !important;
+        }
+        .header-bar .button-row {
+          margin-top: 18px !important;
+          z-index: 0;
+        }
     html, body {
       margin: 0;
       padding: 0;
@@ -24,13 +31,15 @@
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Hanuman', sans-serif;
     }
     .header-bar {
+      overflow: visible;
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
       width: 100vw;
       z-index: 2000;
-      height: 64px;
+      height: 112px;
+      min-height: 112px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.3);
       border-bottom: 1px solid #64748b;
       backdrop-filter: blur(8px) saturate(180%);
@@ -40,7 +49,7 @@
       justify-content: center;
     }
     .header-bar h1 {
-      padding: 18px 0 10px 0;
+      padding: 32px 0 10px 0;
       margin: 0;
       font-size: 32px;
       font-family: 'Hanuman', 'Segoe UI', Arial, sans-serif;
@@ -54,6 +63,7 @@
       letter-spacing: 1px;
       line-height: 1.1;
       text-align: center;
+      z-index: 1;
     }
     .main-wrapper {
       margin-top: 64px;
@@ -914,13 +924,11 @@
   <!-- Header with Title and Buttons -->
   <div class="header-bar">
     <div style="display: flex; flex-direction: column; align-items: center; gap: 0;">
-      <div style="width: 100%; display: flex; flex-direction: row; align-items: center; justify-content: center;">
-        <div style="width: 100%;">
-          <h1 id="title" style="display: flex; justify-content: center; align-items: flex-end; margin: 0 auto; font-size: 32px; font-family: 'Hanuman', 'Segoe UI', Arial, sans-serif; font-style: italic; background: linear-gradient(135deg, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; white-space: nowrap; font-weight: 900; letter-spacing: 1px; line-height: 1.1; text-align: center;">KMQR Generator</h1>
-          <div style="border-bottom: 1.5px solid #334155; width: 100%; margin: 16px auto 8px auto;"></div>
-        </div>
+      <div style="width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+        <h1 id="title" style="display: flex; justify-content: center; align-items: flex-end; margin: 0 auto; font-size: 32px; font-family: 'Hanuman', 'Segoe UI', Arial, sans-serif; font-style: italic; background: linear-gradient(135deg, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; white-space: nowrap; font-weight: 900; letter-spacing: 1px; line-height: 1.1; text-align: center;">KMQR Generator</h1>
+        <div style="border-bottom: 1.5px solid #334155; width: 100%; margin: 8px auto 0 auto;"></div>
       </div>
-      <div style="width: 100%; display: flex; flex-direction: row; gap: 8px; justify-content: center; margin-top: 8px; flex-wrap: nowrap; overflow-x: auto;">
+      <div class="button-row" style="width: 100%; display: flex; flex-direction: row; gap: 8px; justify-content: center; margin-top: 18px; flex-wrap: nowrap; overflow-x: auto;">
         <button id="activateBtn" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 8px 12px; border-radius: 4px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; box-shadow: 0 2px 6px rgba(16,185,129,0.25); min-height: 36px; display: flex; align-items: center; justify-content: center; line-height: 1;" onclick="document.getElementById('helpModal').classList.remove('active'); document.getElementById('helpModal').style.display = 'none'; document.getElementById('aboutModal').classList.remove('active'); document.getElementById('aboutModal').style.display = 'none'; document.getElementById('licenseModal').classList.add('active'); document.getElementById('licenseModal').style.display = 'flex';">🔓 Activate</button>
         <button id="btnHelp2" style="background: #475569; color: #e2e8f0; border: 1px solid #64748b; padding: 8px 12px; border-radius: 4px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; min-height: 36px; display: flex; align-items: center; justify-content: center; line-height: 1;" onclick="document.getElementById('helpModal').classList.add('active'); document.getElementById('helpModal').style.display = 'flex'; document.getElementById('aboutModal').classList.remove('active'); document.getElementById('aboutModal').style.display = 'none'; document.getElementById('licenseModal').classList.remove('active'); document.getElementById('licenseModal').style.display = 'none';"><span style="display: flex; align-items: center; gap: 4px;"><img src="icon.png" alt="Help" style="height: 16px; width: 16px; vertical-align: middle;"> <span id="btnHelp2Text">Help</span></span></button>
         <button id="btnAbout2" style="background: #475569; color: #e2e8f0; border: 1px solid #64748b; padding: 8px 12px; border-radius: 4px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; min-height: 36px; display: flex; align-items: center; justify-content: center; line-height: 1;" onclick="document.getElementById('aboutModal').classList.add('active'); document.getElementById('aboutModal').style.display = 'flex'; document.getElementById('helpModal').classList.remove('active'); document.getElementById('helpModal').style.display = 'none'; document.getElementById('licenseModal').classList.remove('active'); document.getElementById('licenseModal').style.display = 'none'; (function(){var lang=localStorage.getItem('kmqr_lang')||'km';var t=window.translations&&window.translations[lang];if(t){var aboutHtml = '<div style=\'text-align:center;\'><b>'+t.title+'</b></div>';aboutHtml += '<div style=\'margin-top:8px;font-size:15px;\'><b>'+t.version+'</b><br><span>'+t.developerLabel+'</span> <span>'+t.developer+'</span></div>';document.getElementById('aboutContent').innerHTML=aboutHtml;}})();">About</button>
