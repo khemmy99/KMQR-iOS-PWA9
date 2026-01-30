@@ -263,9 +263,9 @@
       padding: 8px 10px 4px 10px;
       position: sticky;
       top: 0;
-      z-index: 102;
+      z-index: 101;
       box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-      max-width: 700px;
+      max-width: 685px;
       margin-left: auto;
       margin-right: auto;
     }
@@ -375,7 +375,7 @@
     button.primary {
       background: linear-gradient(135deg, #3b82f6, #2563eb);
       color: white;
-      margin-top: 12px;
+      margin-top: 0;
     }
 
     button.primary:hover {
@@ -841,9 +841,10 @@
         <div id="logoPreview" class="logo-preview" style="display: none;"></div>
       </div>
       
-      <button class="primary" id="btnGenerate">✨ បង្កើតកូដ QR</button>
-      
-      <button class="ghost" id="btnClear" style="width: 100%; margin-top: 12px;">🗑️ សម្អាត</button>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; align-items: stretch;">
+        <button class="primary" id="btnGenerate" style="min-height: 38px; height: 100%;">✨ បង្កើតកូដ QR</button>
+        <button class="ghost" id="btnClear" style="min-height: 38px; height: 100%;">🗑️ សម្អាត</button>
+      </div>
       
       <!-- ...existing code... -->
       </div>
@@ -854,12 +855,14 @@
       <div class="section">
       <div id="previewLabel" style="font-size: 14px; font-weight: 700; color: #cbd5e1; margin-bottom: 12px;">មើលមុន</div>
       <div id="qrPreview"><p id="previewHint">បញ្ចូលអត្ថបទ ហើយចុចបង្កើត</p></div>
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px;">
-        <button class="secondary" id="btnDownload" disabled onclick="var dm = document.getElementById('downloadMenu'); var sm = document.getElementById('shareMenu'); sm.style.display = 'none'; dm.style.display = dm.style.display === 'block' ? 'none' : 'block';">📥 ទាញយក</button>
-        <button class="secondary" id="btnShare" disabled onclick="var sm = document.getElementById('shareMenu'); var dm = document.getElementById('downloadMenu'); dm.style.display = 'none'; sm.style.display = sm.style.display === 'block' ? 'none' : 'block';">📤 ចែករំលែក</button>
-      </div>
+     
       </div>
     </div>
+  </div>
+
+ <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px;">
+        <button class="secondary" id="btnDownload" disabled onclick="var dm = document.getElementById('downloadMenu'); var sm = document.getElementById('shareMenu'); sm.style.display = 'none'; dm.style.display = dm.style.display === 'block' ? 'none' : 'block';">📥 ទាញយក</button>
+        <button class="secondary" id="btnShare" disabled onclick="var sm = document.getElementById('shareMenu'); var dm = document.getElementById('downloadMenu'); dm.style.display = 'none'; sm.style.display = sm.style.display === 'block' ? 'none' : 'block';">📤 ចែករំលែក</button>
   </div>
 
   <!-- Download Format Selector -->
