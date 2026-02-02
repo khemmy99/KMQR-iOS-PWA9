@@ -1686,15 +1686,27 @@
         link.href = exportCanvas.toDataURL('image/jpeg', 0.95);
         link.click();
       } else if (format === 'pdf') {
-        // Create a new window with the QR code for printing as PDF
-        const pdfWindow = window.open('', '_blank');
+        // Use html2pdf to generate proper single-page PDF
         const imgData = exportCanvas.toDataURL('image/png');
-        pdfWindow.document.write('<html><head><title>KMQR Code</title><style>body{display:flex;justify-content:center;align-items:center;min-height:100vh;margin:0;background:#fff;}img{max-width:100%;height:auto;}</style></head><body><img src="' + imgData + '" alt="QR Code"/></body></html>');
-        pdfWindow.document.close();
-        pdfWindow.focus();
-        setTimeout(() => {
-          pdfWindow.print();
-        }, 500);
+        const pdfContainer = document.createElement('div');
+        pdfContainer.style.cssText = 'display:flex;justify-content:center;align-items:center;padding:20px;background:#fff;';
+        const img = document.createElement('img');
+        img.src = imgData;
+        img.style.cssText = 'max-width:100%;height:auto;';
+        pdfContainer.appendChild(img);
+        
+        const opt = {
+          margin: 10,
+          filename: 'KMQR-' + Date.now() + '.pdf',
+          image: { type: 'png', quality: 1 },
+          html2canvas: { scale: 2, useCORS: true },
+          jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+          pagebreak: { mode: 'avoid-all' }
+        };
+        
+        html2pdf().set(opt).from(pdfContainer).save().then(function() {
+          // PDF saved successfully, user stays in app
+        });
       }
     };
 
