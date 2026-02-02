@@ -12,17 +12,9 @@
   <link rel="icon" type="image/png" href="icon.png">
   <link rel="shortcut icon" href="icon.png" type="image/png">
   
-  <!-- Apple iOS Home Screen Icon -->
-  <link rel="apple-touch-icon" href="icon.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="icon.png">
-  <link rel="apple-touch-icon" sizes="152x152" href="icon.png">
-  <link rel="apple-touch-icon" sizes="144x144" href="icon.png">
-  <link rel="apple-touch-icon" sizes="120x120" href="icon.png">
-  <link rel="apple-touch-icon" sizes="114x114" href="icon.png">
-  <link rel="apple-touch-icon" sizes="76x76" href="icon.png">
-  <link rel="apple-touch-icon" sizes="72x72" href="icon.png">
-  <link rel="apple-touch-icon" sizes="60x60" href="icon.png">
-  <link rel="apple-touch-icon" sizes="57x57" href="icon.png">
+  <!-- Apple iOS Home Screen Icon - Generated dynamically with white background -->
+  <link rel="apple-touch-icon" id="app-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAACXBIWXMAAAsTAAALEwEAmpwYAAAF8WlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDUgNzkuMTYzNDk5LCAyMDE4LzA4LzEzLTE2OjQwOjIyICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDI2LTAyLTAyVDEwOjAwOjAwKzA3OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAyNi0wMi0wMlQxMDowMDowMCswNzowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAyNi0wMi0wMlQxMDowMDowMCswNzowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDAiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDAwMDAwIiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6MDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDAwMDAwIj4gPHhtcE1NOkhpc3Rvcnk+IDxyZGY6U2VxPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY3JlYXRlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDowMDAwMDAwMC0wMDAwLTAwMDAtMDAwMC0wMDAwMDAwMDAwMDAiIHN0RXZ0OndoZW49IjIwMjYtMDItMDJUMTA6MDA6MDArMDc6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCBDQyAyMDE5IChXaW5kb3dzKSIvPiA8L3JkZjpTZXE+IDwveG1wTU06SGlzdG9yeT4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz4KAwXEAAAEhklEQVR4nO3dwW7bMBAF0Nz//5/sog0aOJYlLjkcvXMqJFKeeWQZW/n5+fn5+wDg//Hz9AsA+EtCDSQJNZAk1ECSUANJQg0kCTWQJNRAklADSUINJAk1kCTUQJJQA0lCDSQJNZAk1ECSUANJQg0kCTWQJNRAklADSUINJAk1kCTUQJJQA0lCDSQJNZAk1ECSUANJQg0kCTWQJNRAklADSUINJAk1kCTUQJJQA0lCDSQJNZAk1ECSUANJQg0kCTWQ9PP0C+A/+fn5+fP7//xdv+T8fv9bf+f3+8++e/TnEaG+2W9BPfLvnwXxrN+P/nyvCMKzD6F+kbPgHfn7I8/xbJjPBPKs5/vrOfG5hHrYkd3z7PPueuwZe3a7R3fYI7v5kdfyygD9xj0c0ENuDvXZnfKsXeusnfPu11mPHHl+Z593dNf9rT8rexDqyUd26XvCceT5z9o5j4TryM765ud4xnsS6olHds57gnHm+Y8+75FA3f0cV/3sM/dJqCeeCc5vu/CZz/Xb7nfG8x95rqv+7l3v4d25T0K96e4wndktz3yNI891xd+/67W8i1BvunPHPHPXPeNrb72Gs/7+na/lXYR6qCPhuOs57g79b89xxt8940yo7wxp5bl+u1ehHuqunfLu3f3o857xe68M0V1hPfr3v8WuJdRDHdktz+ySZwTwzJ31rOc+8lqu/LtnPO9vu5dQL/TbLnnW7nfWLnrWLntkR73iOY8855V/9yyhXujMjnlWII4G5qzHnnXnu+K177xPoV5oyS55VhiOhuCK57rqtV31nK8m1AtdscvdsQPe+bXOet6jP/Oq+3k1oV7ojp3yzsDc+bXueM6rX/8rCfVCZ3bLM4JxNBRnPfbs573yuV5NqBdafYc7I0h3Pucdz7n6+V9FqBdaeYe7IzBXfc2zn++K137X/byaUC+08g53RliufJ1XPO+R13LF6383oV5oxR1u5Q52xde84vnOeC2vdr9CvdCKO9wdIbrya17xvGe8lntyv0K90Io73IrhOfp3r3rdK573zOd6F6Fe6JM73KrBuep1rvg7VzzXu3J/Qr3QJ3e4FYNy9etc8RpXPu8rCfVCZ+9wd4fljte58nmv+pmvINQL/XaHuzMgd/3OVa9z1fO9klAvdHanvDMgd/7OVa9z1c99BaFeaNVd8u4dctXvXPG873w/Qr3QqrvknTvkqt+54rnf+X6EeqFP7JKrhueu17nqed75nu5PqBf6xC75qd9Z9TxX/8xXEOqFznwueGdQrvydq577ne/n3oR6oTPDcmeojvzOVc9z9c98BaFe6MrPBX/77BXP88nf+SSh3r7QZz4XPPt5z9oZr37eT/3MZwj19oWufPBg1fNc+TOf+FqvINTbF7ry8bs7f+eq57nqud75noR6+0Kf+pxvxfM87vPIdzzOOwr19oU+9TnfkZBdvaMeeewZz/uo3+ORx76LUG9f6O7n+O21XPm8R17LFY+9k1BvX+iu5zh7h73zec5+LSv+7iMJ9faFzv4ceXdQPvVz3h2udxLq7Qud+TnvDtdVP/OdhHr7Qmfvhp/YKV/xM8/6u+8k1NsXOvPz3B2oVf/uu/76F//R/xZ/LQDlAAAAAElFTkSuQmCC">
+  <link rel="apple-touch-icon" sizes="180x180" id="app-icon-180" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAYAAAA9zQYyAAAACXBIWXMAAAsTAAALEwEAmpwYAAAF8WlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDUgNzkuMTYzNDk5LCAyMDE4LzA4LzEzLTE2OjQwOjIyICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ0MgMjAxOSAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDI2LTAyLTAyVDEwOjAwOjAwKzA3OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAyNi0wMi0wMlQxMDowMDowMCswNzowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAyNi0wMi0wMlQxMDowMDowMCswNzowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDowMDAwMDAwMC0wMDAw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">
   
   <!-- Apple PWA Settings -->
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1768,6 +1760,35 @@
       });
     });
 
+    // Generate app icon with white background
+    function generateAppIcon() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 180;
+      canvas.height = 180;
+      const ctx = canvas.getContext('2d');
+      
+      // White rounded background
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.roundRect(0, 0, 180, 180, 36);
+      ctx.fill();
+      
+      // Draw QR-like icon
+      ctx.fillStyle = '#3b82f6';
+      ctx.font = 'bold 80px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('QR', 90, 90);
+      
+      // Update icon links
+      const iconData = canvas.toDataURL('image/png');
+      const iconLinks = document.querySelectorAll('link[rel="apple-touch-icon"]');
+      iconLinks.forEach(link => {
+        link.href = iconData;
+      });
+    }
+    
+    generateAppIcon();
     updateLanguage(currentLang);
     updateActivationStatus();
     initializeWelcome();
