@@ -531,18 +531,21 @@
       position: absolute;
       top: 12px;
       right: 12px;
-      font-size: 24px;
-      font-weight: bold;
+      font-size: 14px !important;
+      font-weight: 600;
       cursor: pointer;
       color: #ffffff;
       background: #ef4444;
       border: none;
-      padding: 0;
-      width: 36px;
-      height: 36px;
-      line-height: 36px;
+      padding: 8px 16px !important;
+      width: auto !important;
+      min-width: 60px !important;
+      max-width: 80px !important;
+      height: 34px !important;
+      min-height: 34px !important;
+      line-height: 1;
       text-align: center;
-      border-radius: 50%;
+      border-radius: 20px;
       transition: all 0.2s;
       pointer-events: auto !important;
       z-index: 5002;
@@ -551,12 +554,12 @@
 
     .close-btn:hover {
       background: #dc2626;
-      transform: scale(1.1);
+      transform: none;
     }
     
     .close-btn:active {
       background: #b91c1c;
-      transform: scale(0.95);
+      transform: none;
     }
 
     .logo-preview {
@@ -774,10 +777,8 @@
   <!-- Header with Title and Buttons -->
   <div class="header-bar">
     <div style="display: flex; flex-direction: column; align-items: center; gap: 0; width: 100%; max-width: 700px; margin-left: auto; margin-right: auto;">
-      <div style="width: 100%; display: grid; grid-template-columns: 110px 1fr 110px; align-items: center; padding: 0 8px;">
-        <div></div>
+      <div style="width: 100%; display: flex; justify-content: center; align-items: center; padding: 0 8px;">
         <h1 id="title" style="display: flex; justify-content: center; align-items: center; margin: 0; font-size: 26px; font-family: 'Hanuman', 'Segoe UI', Arial, sans-serif; font-style: italic; background: linear-gradient(135deg, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; white-space: nowrap; font-weight: 900; letter-spacing: 1px; line-height: 1.1; text-align: center;">KMQR Generator</h1>
-        <button id="activateBtn" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 8px 0; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; box-shadow: 0 2px 6px rgba(16,185,129,0.25); min-height: 34px; width: 100%; max-width: 110px; display: flex; align-items: center; justify-content: center; line-height: 1; justify-self: end;" onclick="document.getElementById('helpModal').classList.remove('active'); document.getElementById('helpModal').style.display = 'none'; document.getElementById('aboutModal').classList.remove('active'); document.getElementById('aboutModal').style.display = 'none'; document.getElementById('licenseModal').classList.add('active'); document.getElementById('licenseModal').style.display = 'flex';">🔓 Activate</button>
       </div>
       <div class="button-row" style="width: 100%; display: flex; flex-direction: row; gap: 8px; justify-content: center; margin-top: 10px; margin-bottom: 8px; flex-wrap: nowrap; overflow-x: auto;">
         <button id="btnHelp2" style="background: #475569; color: #e2e8f0; border: 1px solid #64748b; padding: 8px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; min-height: 36px; display: flex; align-items: center; justify-content: center; line-height: 1;" onclick="showHelpModal();">❓ <span id="btnHelp2Text">Help</span></button>
@@ -791,7 +792,7 @@
   <!-- Update Info Modal -->
   <div id="updateInfoModal" class="modal">
     <div class="modal-content" style="max-width: 380px; text-align: center;">
-      <button class="close-btn" onclick="document.getElementById('updateInfoModal').classList.remove('active'); document.getElementById('updateInfoModal').style.display = 'none';">&times;</button>
+      <button class="close-btn" id="updateCloseBtn" onclick="document.getElementById('updateInfoModal').classList.remove('active'); document.getElementById('updateInfoModal').style.display = 'none';">Close</button>
       <h2 style="color: #f59e0b; font-size: 22px; font-weight: 700; margin: 0 0 18px 0;">Update Info</h2>
       <div id="updateInfoContent" style="font-size:16px;line-height:1.7;color:#e2e8f0;"></div>
     </div>
@@ -867,7 +868,10 @@
         
         <div style="margin-top: 14px;">
           <label id="logoLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">ជ្រើសរើសរូបភាព</label>
-          <button id="logoUploadBtn" class="secondary" style="margin-top: 0; margin-bottom: 0;" onclick="document.getElementById('logoUpload').click();">📁 ជ្រើសរូបភាព</button>
+          <div style="display: flex; gap: 8px; align-items: stretch;">
+            <button id="logoUploadBtn" class="secondary" style="margin-top: 0; margin-bottom: 0; flex: 1; height: 38px; min-height: 38px; max-height: 38px;" onclick="document.getElementById('logoUpload').click();">📁 ជ្រើសរូបភាព</button>
+            <button id="activateBtn" class="secondary" style="background: linear-gradient(135deg, #10b981, #059669); border: 1px solid #10b981; margin-top: 0; margin-bottom: 0; flex: 1; height: 38px; min-height: 38px; max-height: 38px;" onclick="document.getElementById('helpModal').classList.remove('active'); document.getElementById('helpModal').style.display = 'none'; document.getElementById('aboutModal').classList.remove('active'); document.getElementById('aboutModal').style.display = 'none'; document.getElementById('licenseModal').classList.add('active'); document.getElementById('licenseModal').style.display = 'flex';">🔓 Activate</button>
+          </div>
           <input id="logoUpload" type="file" accept="image/*" style="display: none;" onchange="handleLogoUpload(this);" />
           <div id="logoPreview" class="logo-preview" style="display: none;"></div>
         </div>
@@ -914,7 +918,7 @@
   <!-- Help Modal -->
   <div id="helpModal" class="modal">
     <div class="modal-content" style="max-width: 420px;">
-      <button class="close-btn" onclick="document.getElementById('helpModal').classList.remove('active'); document.getElementById('helpModal').style.display = 'none';">&times;</button>
+      <button class="close-btn" id="helpCloseBtn" onclick="document.getElementById('helpModal').classList.remove('active'); document.getElementById('helpModal').style.display = 'none';">Close</button>
       <h2 id="helpTitle" style="color: #22d3a9; font-size: 32px; font-weight: 700; margin: 0 0 18px 0; text-align: center;">ជំនួយ - KMQR Generator Pro</h2>
       <div id="helpContent" style="font-size:16px;line-height:1.7;color:#e2e8f0;"></div>
     </div>
@@ -923,7 +927,7 @@
   <!-- About Modal -->
   <div id="aboutModal" class="modal">
     <div class="modal-content" style="max-width: 420px;">
-      <button class="close-btn" onclick="document.getElementById('aboutModal').classList.remove('active'); document.getElementById('aboutModal').style.display = 'none';">&times;</button>
+      <button class="close-btn" id="aboutCloseBtn" onclick="document.getElementById('aboutModal').classList.remove('active'); document.getElementById('aboutModal').style.display = 'none';">Close</button>
       <h2 id="aboutTitle" style="color: #3b82f6; font-size: 28px; font-weight: 700; margin: 0 0 12px 0; text-align: center;">អំពី KMQR Generator Pro</h2>
       <div id="aboutContent" style="font-size:16px;line-height:1.7;color:#e2e8f0;"></div>
     </div>
@@ -1238,6 +1242,8 @@
       en: {
         title: 'KMQR Generator',
         textLabel: 'Text or URL',
+        textPlaceholder: 'Enter text, URL, or any language...',
+        overlayPlaceholder: 'e.g. Khem My',
         sizeLabel: 'Size',
         ecLabel: 'Error Correction',
         ecLow: 'Low', ecMedium: 'Medium', ecQuartile: 'Quartile', ecHigh: 'High',
@@ -1286,6 +1292,7 @@
         alertCopied: 'Copied!',
         confirmDeactivate: 'Deactivate?',
         logoSelected: 'Logo selected',
+        btnClose: 'Close',
         footerPhone: 'Phone:',
         footerTelegram: 'Telegram:',
         footerFacebook: 'Facebook:',
@@ -1353,6 +1360,9 @@
         alertCopied: 'បានចម្លងហើយ!',
         confirmDeactivate: 'ផ្តាច់សិទ្ធប្រើប្រាស់ពេញលេញ?',
         logoSelected: 'បានជ្រើសរើសឡូហ្គោ',
+        textPlaceholder: 'បញ្ចូលអត្ថបទ, URL, ឬភាសាខ្មែរ…',
+        overlayPlaceholder: 'ឧ. ខែម​ មី',
+        btnClose: 'បិទ',
       }
     };
 
@@ -1414,10 +1424,17 @@
       if (document.getElementById('btnAbout2')) document.getElementById('btnAbout2').textContent = t.btnAbout;
       if (document.getElementById('updateCheckBtn')) document.getElementById('updateCheckBtn').textContent = t.btnUpdate;
       
+      // Update close buttons
+      if (document.getElementById('updateCloseBtn')) document.getElementById('updateCloseBtn').textContent = t.btnClose;
+      if (document.getElementById('helpCloseBtn')) document.getElementById('helpCloseBtn').textContent = t.btnClose;
+      if (document.getElementById('aboutCloseBtn')) document.getElementById('aboutCloseBtn').textContent = t.btnClose;
+      
       // Update license modal content
       if (document.getElementById('licenseModalTitle')) document.getElementById('licenseModalTitle').innerHTML = t.licenseModalTitle;
       if (document.getElementById('licenseInstructions')) document.getElementById('licenseInstructions').innerHTML = t.licenseInstructions;
       if (document.getElementById('licenseCodeInput')) document.getElementById('licenseCodeInput').placeholder = t.licenseInputPlaceholder;
+      if (document.getElementById('qrText')) document.getElementById('qrText').placeholder = t.textPlaceholder;
+      if (document.getElementById('overlayText')) document.getElementById('overlayText').placeholder = t.overlayPlaceholder;
       if (document.getElementById('licenseContactInfo')) document.getElementById('licenseContactInfo').innerHTML = t.licenseContactInfo;
       
       const btnToggle = document.getElementById('langToggle');
