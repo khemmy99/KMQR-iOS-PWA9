@@ -58,27 +58,26 @@
     .header-bar {
       overflow: visible;
       position: fixed;
-      top: 10px;
+      top: 8px;
       left: 50%;
       transform: translateX(-50%);
       width: 700px;
-      max-width: calc(100vw - 20px);
+      max-width: calc(100vw - 16px);
       z-index: 2000;
-      height: 112px;
-      min-height: 112px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-      border: 1px solid #64748b;
-      border-radius: 8px;
+      height: 100px;
+      min-height: 100px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15), 0 2px 10px rgba(0,0,0,0.1);
+      border: 2px solid #e2e8f0;
+      border-radius: 16px;
       backdrop-filter: blur(8px) saturate(180%);
-      background: rgba(30,41,59,0.95);
+      background: #ffffff;
       display: flex;
       flex-direction: column;
       justify-content: center;
       margin: 0;
-      padding: 0 16px;
+      padding: 0 12px;
       box-sizing: border-box;
     }
-
     .header-bar > div {
       margin-top: 0 !important;
     }
@@ -91,38 +90,46 @@
     .header-bar h1 {
       padding: 16px 0 8px 0;
       margin: 0;
-      font-size: 32px;
-      font-family: 'Hanuman', 'Segoe UI', Arial, sans-serif;
-      font-style: italic;
-      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
+      font-size: 36px;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-style: normal;
+      color: #1e40af;
+      text-shadow: none;
       white-space: nowrap;
-      font-weight: 900;
-      letter-spacing: 1px;
+      font-weight: 700;
+      letter-spacing: 3px;
       line-height: 1.1;
       text-align: center;
       z-index: 1;
+      text-transform: uppercase;
     }
 
     .main-wrapper {
-      margin-top: 130px;
+      margin-top: 110px;
       width: 700px;
       margin-left: auto;
       margin-right: auto;
       max-width: 100vw;
+      padding: 8px 0 0 0;
+      box-sizing: border-box;
     }
 
     .main-wrapper > .container {
-      width: 700px;
-      margin: 10px auto 18px auto;
-      margin-top: 60px !important;
-      max-width: 100vw;
+      width: 100%;
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 0;
     }
 
     .footer-bar {
+      margin-top: 40px;
       margin-bottom: 32px;
+      border-radius: 16px;
+      border: 2px solid #3b82f6;
+      box-shadow: 0 4px 20px rgba(59, 130, 246, 0.25), 0 2px 10px rgba(0,0,0,0.3);
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     #loadingScreen {
@@ -174,30 +181,21 @@
       font-size: 32px;
       font-style: italic;
       font-weight: bold;
-      display: flex;
-      align-items: flex-end;
-      margin: 0;
+      margin: 20px 0 0 0;
       padding: 0;
-      margin: 40px auto 20px auto;
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-      padding: 0 8px;
     }
 
     .container {
       width: 100%;
       max-width: 700px;
-      background: #1e293b;
+      background: #0f172a;
       border-radius: 0;
-      padding: 16px;
+      padding: 12px 12px;
       box-shadow: none;
       position: relative;
       z-index: 100;
-      border: 1px solid #334155;
-      margin-top: 50px !important;
-      margin-left: auto;
-      margin-right: auto;
+      border: none;
+      margin: 0 auto;
     }
 
     #activationStatus {
@@ -215,10 +213,11 @@
     }
 
     .section {
-      background: #0f172a;
-      padding: 16px;
+      background: #1e293b;
+      padding: 14px;
       border-radius: 8px;
-      margin-bottom: 16px;
+      margin-bottom: 10px;
+      border: 1px solid #334155;
     }
 
     .section-title {
@@ -236,7 +235,7 @@
       width: 100%;
       padding: 12px;
       border: 1px solid #334155;
-      border-radius: 6px;
+      border-radius: 12px;
       background: #1e293b;
       color: #e2e8f0;
       margin-bottom: 8px;
@@ -252,6 +251,7 @@
       padding: 4px;
       height: 32px;
       cursor: pointer;
+      border-radius: 8px;
     }
 
     select {
@@ -296,7 +296,7 @@
     button {
       padding: 10px 14px;
       border: none;
-      border-radius: 4px;
+      border-radius: 20px;
       font-weight: 600;
       cursor: pointer;
       font-size: 13px;
@@ -528,36 +528,42 @@
     }
 
     .close-btn {
-      float: right;
-      font-size: 28px;
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      font-size: 24px;
       font-weight: bold;
       cursor: pointer;
-      color: #64748b;
-      background: none;
+      color: #ffffff;
+      background: #ef4444;
       border: none;
-      padding: 4px 8px;
-      width: auto;
-      margin: -8px -8px 0 0;
-      line-height: 1;
-      transition: color 0.2s;
+      padding: 0;
+      width: 36px;
+      height: 36px;
+      line-height: 36px;
+      text-align: center;
+      border-radius: 50%;
+      transition: all 0.2s;
       pointer-events: auto !important;
       z-index: 5002;
-      position: relative;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
     }
 
     .close-btn:hover {
-      color: #ef4444;
+      background: #dc2626;
+      transform: scale(1.1);
     }
     
     .close-btn:active {
-      color: #dc2626;
+      background: #b91c1c;
+      transform: scale(0.95);
     }
 
     .logo-preview {
       margin-top: 8px;
       padding: 8px;
       background: #0f172a;
-      border-radius: 4px;
+      border-radius: 12px;
       text-align: center;
       max-height: 80px;
     }
@@ -565,7 +571,7 @@
     .logo-preview img {
       max-width: 100%;
       max-height: 80px;
-      border-radius: 4px;
+      border-radius: 8px;
     }
 
     .logo-preview p {
@@ -686,12 +692,12 @@
       <div style="background: #0f172a; padding: 16px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #334155;">
         <div id="deviceIdInfo" style="margin-bottom: 10px; text-align: center;"></div>
         <p id="licenseInstructions" style="font-size: 13px; color: #cbd5e1; margin-bottom: 12px;"><strong>បញ្ចូលលេខកូដរបស់អ្នកខាងក្រោមដើម្បីដោះសោមុខងារពេញលេញ៖</strong></p>
-        <input type="text" id="licenseCodeInput" placeholder="បញ្ចូលលេខកូដរបស់អ្នកនៅទីនេះ..." style="width: 100%; padding: 12px; border: 1px solid #475569; border-radius: 6px; background: #1e293b; color: #e2e8f0; font-size: 14px; margin-bottom: 12px; font-family: monospace; touch-action: manipulation; pointer-events: auto;">
+        <input type="text" id="licenseCodeInput" placeholder="បញ្ចូលលេខកូដរបស់អ្នកនៅទីនេះ..." style="width: 100%; padding: 12px; border: 1px solid #475569; border-radius: 12px; background: #1e293b; color: #e2e8f0; font-size: 14px; margin-bottom: 12px; font-family: monospace; touch-action: manipulation; pointer-events: auto;">
         <p id="licenseContactInfo" style="font-size: 12px; color: #94a3b8; line-height: 1.6;">📧 មិនមានលេខកូដទេ?<br>ទំនាក់ទំនង៖ <strong><a href="mailto:my.khem.mathst@gmail.com" style="color:#3b82f6;">my.khem.mathst@gmail.com</a></strong><br>📱 ទូរស័ព្ទ៖ <strong><a href="tel:+85566931319" style="color:#3b82f6;">+855 66/99 931319</a></strong><br>💬 Telegram៖ <strong><a href="https://t.me/khemmy99" target="_blank" style="color:#3b82f6;">@khemmy99</a></strong></p>
       </div>
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-        <button id="btnActivateLicense" type="button" onclick="try { handleBtnActivateLicense(); } catch(e) { console.error('Error:', e); alert('Error: ' + e.message); }" style="padding: 14px; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; min-height: 50px; width: 100%; pointer-events: auto; touch-action: manipulation; -webkit-user-select: none; user-select: none;">✅ ធ្វើឱ្យសកម្ម</button>
-        <button id="btnCancelLicense" type="button" onclick="try { handleBtnCancelLicense(); } catch(e) { console.error('Error:', e); alert('Error: ' + e.message); }" style="padding: 14px; background: #64748b; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px; min-height: 50px; width: 100%; pointer-events: auto; touch-action: manipulation; -webkit-user-select: none; user-select: none;">បោះបង់</button>
+        <button id="btnActivateLicense" type="button" onclick="try { handleBtnActivateLicense(); } catch(e) { console.error('Error:', e); alert('Error: ' + e.message); }" style="padding: 14px; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 14px; min-height: 50px; width: 100%; pointer-events: auto; touch-action: manipulation; -webkit-user-select: none; user-select: none;">✅ ធ្វើឱ្យសកម្ម</button>
+        <button id="btnCancelLicense" type="button" onclick="try { handleBtnCancelLicense(); } catch(e) { console.error('Error:', e); alert('Error: ' + e.message); }" style="padding: 14px; background: #64748b; color: white; border: none; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 14px; min-height: 50px; width: 100%; pointer-events: auto; touch-action: manipulation; -webkit-user-select: none; user-select: none;">បោះបង់</button>
       </div>
     </div>
   </div>
@@ -699,16 +705,16 @@
   <!-- Header with Title and Buttons -->
   <div class="header-bar">
     <div style="display: flex; flex-direction: column; align-items: center; gap: 0; width: 100%; max-width: 700px; margin-left: auto; margin-right: auto;">
-      <div style="width: 100%; display: flex; flex-direction: row; align-items: center; justify-content: center; padding: 0 8px; position: relative;">
-        <h1 id="title" style="display: flex; justify-content: center; align-items: center; margin: 0; font-size: 28px; font-family: 'Hanuman', 'Segoe UI', Arial, sans-serif; font-style: italic; background: linear-gradient(135deg, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; white-space: nowrap; font-weight: 900; letter-spacing: 1px; line-height: 1.1; text-align: center;">KMQR Generator</h1>
-        <button id="activateBtn" style="position: absolute; right: 8px; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 8px 0; border-radius: 4px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; box-shadow: 0 2px 6px rgba(16,185,129,0.25); min-height: 36px; width: 110px; display: flex; align-items: center; justify-content: center; line-height: 1;" onclick="document.getElementById('helpModal').classList.remove('active'); document.getElementById('helpModal').style.display = 'none'; document.getElementById('aboutModal').classList.remove('active'); document.getElementById('aboutModal').style.display = 'none'; document.getElementById('licenseModal').classList.add('active'); document.getElementById('licenseModal').style.display = 'flex';">🔓 Activate</button>
+      <div style="width: 100%; display: grid; grid-template-columns: 110px 1fr 110px; align-items: center; padding: 0 8px;">
+        <div></div>
+        <h1 id="title" style="display: flex; justify-content: center; align-items: center; margin: 0; font-size: 26px; font-family: 'Hanuman', 'Segoe UI', Arial, sans-serif; font-style: italic; background: linear-gradient(135deg, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; white-space: nowrap; font-weight: 900; letter-spacing: 1px; line-height: 1.1; text-align: center;">KMQR Generator</h1>
+        <button id="activateBtn" style="background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; padding: 8px 0; border-radius: 20px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; box-shadow: 0 2px 6px rgba(16,185,129,0.25); min-height: 34px; width: 100%; max-width: 110px; display: flex; align-items: center; justify-content: center; line-height: 1; justify-self: end;" onclick="document.getElementById('helpModal').classList.remove('active'); document.getElementById('helpModal').style.display = 'none'; document.getElementById('aboutModal').classList.remove('active'); document.getElementById('aboutModal').style.display = 'none'; document.getElementById('licenseModal').classList.add('active'); document.getElementById('licenseModal').style.display = 'flex';">🔓 Activate</button>
       </div>
-      <div style="border-bottom: 1.5px solid #334155; width: 100%; margin: 4px auto 0 auto;"></div>
-      <div class="button-row" style="width: 100%; display: flex; flex-direction: row; gap: 8px; justify-content: center; margin-top: 12px; margin-bottom: 8px; flex-wrap: nowrap; overflow-x: auto;">
-        <button id="btnHelp2" style="background: #475569; color: #e2e8f0; border: 1px solid #64748b; padding: 8px 12px; border-radius: 4px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; min-height: 36px; display: flex; align-items: center; justify-content: center; line-height: 1;" onclick="showHelpModal();">❓ <span id="btnHelp2Text">Help</span></button>
-        <button id="btnAbout2" style="background: #475569; color: #e2e8f0; border: 1px solid #64748b; padding: 8px 12px; border-radius: 4px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; min-height: 36px; display: flex; align-items: center; justify-content: center; line-height: 1;" onclick="showAboutModal();">About</button>
-        <button id="langToggle" style="background: #475569; color: #e2e8f0; border: 1px solid #64748b; padding: 8px 12px; border-radius: 4px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; min-height: 36px; display: flex; align-items: center; justify-content: center; line-height: 1;">🌐 English</button>
-        <button id="updateCheckBtn" onclick="performUpdate();" style="background: #64748b; color: #e2e8f0; border: 1px solid #94a3b8; padding: 8px 12px; border-radius: 4px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; min-height: 36px; display: flex; align-items: center; justify-content: center; line-height: 1;">🔄 Update</button>
+      <div class="button-row" style="width: 100%; display: flex; flex-direction: row; gap: 8px; justify-content: center; margin-top: 10px; margin-bottom: 8px; flex-wrap: nowrap; overflow-x: auto;">
+        <button id="btnHelp2" style="background: #475569; color: #e2e8f0; border: 1px solid #64748b; padding: 8px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; min-height: 36px; display: flex; align-items: center; justify-content: center; line-height: 1;" onclick="showHelpModal();">❓ <span id="btnHelp2Text">Help</span></button>
+        <button id="btnAbout2" style="background: #475569; color: #e2e8f0; border: 1px solid #64748b; padding: 8px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; min-height: 36px; display: flex; align-items: center; justify-content: center; line-height: 1;" onclick="showAboutModal();">About</button>
+        <button id="langToggle" style="background: #475569; color: #e2e8f0; border: 1px solid #64748b; padding: 8px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; min-height: 36px; display: flex; align-items: center; justify-content: center; line-height: 1;">🌐 English</button>
+        <button id="updateCheckBtn" onclick="performUpdate();" style="background: #64748b; color: #e2e8f0; border: 1px solid #94a3b8; padding: 8px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: all 0.2s; min-height: 36px; display: flex; align-items: center; justify-content: center; line-height: 1;">🔄 Update</button>
       </div>
     </div>
   </div>
@@ -716,7 +722,7 @@
   <!-- Update Info Modal -->
   <div id="updateInfoModal" class="modal">
     <div class="modal-content" style="max-width: 380px; text-align: center;">
-      <button class="close-btn" onclick="document.getElementById('updateInfoModal').classList.remove('active'); document.getElementById('updateInfoModal').style.display = 'none';" style="position: absolute; top: 18px; right: 18px; font-size: 36px; color: #94a3b8; background: none; border: none; cursor: pointer;">&times;</button>
+      <button class="close-btn" onclick="document.getElementById('updateInfoModal').classList.remove('active'); document.getElementById('updateInfoModal').style.display = 'none';">&times;</button>
       <h2 style="color: #f59e0b; font-size: 22px; font-weight: 700; margin: 0 0 18px 0;">Update Info</h2>
       <div id="updateInfoContent" style="font-size:16px;line-height:1.7;color:#e2e8f0;"></div>
     </div>
@@ -726,11 +732,12 @@
     <div class="container">
       <div class="section">
         <div class="section-title" id="textLabel">អត្ថបទ ឬ URL</div>
-        <input id="qrText" type="text" placeholder="បញ្ចូលអត្ថបទ, URL, ឬភាសាខ្មែរ…" />
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; align-items: stretch;">
+        <input id="qrText" type="text" placeholder="បញ្ចូលអត្ថបទ, URL, ឬភាសាខ្មែរ…" style="margin-bottom: 0;" />
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px;">
           <div>
-            <label id="sizeLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">ទំហំ</label>
-            <select id="qrSize">
+            <label id="sizeLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">ទំហំ</label>
+            <select id="qrSize" style="margin-bottom: 0;">
               <option value="200">200</option>
               <option value="256">256</option>
               <option value="320">320</option>
@@ -738,8 +745,8 @@
             </select>
           </div>
           <div>
-            <label id="ecLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">កម្រិតកែកំហុស</label>
-            <select id="qrEC">
+            <label id="ecLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">កម្រិតកែកំហុស</label>
+            <select id="qrEC" style="margin-bottom: 0;">
               <option value="L" id="ecLow">ទាប</option>
               <option value="M" selected id="ecMedium">មធ្យម</option>
               <option value="Q" id="ecQuartile">ខ្ពស់</option>
@@ -747,57 +754,63 @@
             </select>
           </div>
         </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; align-items: stretch;">
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px;">
           <div>
-            <label id="dpiLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">គុណភាព (DPI)</label>
-            <select id="dpiScale">
+            <label id="dpiLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">គុណភាព (DPI)</label>
+            <select id="dpiScale" style="margin-bottom: 0;">
               <option value="1">1×</option>
               <option value="2" selected>2×</option>
               <option value="3">3×</option>
             </select>
           </div>
           <div>
-            <label id="roundLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1;">រូបសញ្ញាមូល</label>
-            <select id="logoRound">
+            <label id="roundLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">រូបសញ្ញាមូល</label>
+            <select id="logoRound" style="margin-bottom: 0;">
               <option value="no" id="no">ទេ</option>
               <option value="yes" selected id="yes">បាទ/ចាស</option>
             </select>
           </div>
         </div>
-        <div class="color-row" style="margin-top: 12px; grid-template-columns: 1fr 1fr; gap: 10px; align-items: stretch;">
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px;">
           <div>
-            <label id="fgLabel">ពណ៌មុខ</label>
-            <input id="qrFG" type="color" value="#000000" />
+            <label id="fgLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">ពណ៌មុខ</label>
+            <input id="qrFG" type="color" value="#000000" style="margin-bottom: 0;" />
           </div>
           <div>
-            <label id="bgLabel">ពណ៌ខាងក្រោយ</label>
-            <input id="qrBG" type="color" value="#ffffff" />
-          </div>
-        </div>
-        <div class="color-row" style="margin-top: 12px; grid-template-columns: 1fr; gap: 10px; align-items: stretch;">
-          <div>
-            <label id="logoBgLabel" style="display: inline-block; height: 40px; line-height: 40px;">ពណ៌ខាងក្រោយរូបសញ្ញា</label>
-            <input id="logoBg" type="color" value="#ffffff" />
+            <label id="bgLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">ពណ៌ខាងក្រោយ</label>
+            <input id="qrBG" type="color" value="#ffffff" style="margin-bottom: 0;" />
           </div>
         </div>
-        <div>
+        
+        <div style="display: grid; grid-template-columns: 1fr; gap: 12px; margin-top: 14px;">
+          <div>
+            <label id="logoBgLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">ពណ៌ខាងក្រោយរូបសញ្ញា</label>
+            <input id="logoBg" type="color" value="#ffffff" style="margin-bottom: 0;" />
+          </div>
+        </div>
+        
+        <div style="margin-top: 14px;">
           <label id="captionLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">អត្ថបទលើកូដ</label>
-          <input id="overlayText" type="text" placeholder="ឧ. ខែម​ មី" />
+          <input id="overlayText" type="text" placeholder="ឧ. ខែម​ មី" style="margin-bottom: 0;" />
         </div>
-        <div>
+        
+        <div style="margin-top: 14px;">
           <label id="logoLabel" style="font-size: 12px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">ជ្រើសរើសរូបភាព</label>
-          <button id="logoUploadBtn" class="secondary" style="margin-top: 0;" onclick="document.getElementById('logoUpload').click();">📁 ជ្រើសរូបភាព</button>
+          <button id="logoUploadBtn" class="secondary" style="margin-top: 0; margin-bottom: 0;" onclick="document.getElementById('logoUpload').click();">📁 ជ្រើសរូបភាព</button>
           <input id="logoUpload" type="file" accept="image/*" style="display: none;" onchange="handleLogoUpload(this);" />
           <div id="logoPreview" class="logo-preview" style="display: none;"></div>
         </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; align-items: center;">
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px;">
           <button class="primary" id="btnGenerate" style="min-height: 44px; height: 44px; line-height: 1; padding: 0 12px;">✨ បង្កើតកូដ QR</button>
           <button class="ghost" id="btnClear" style="min-height: 44px; height: 44px; line-height: 1; padding: 0 12px;">🗑️ សម្អាត</button>
         </div>
       </div>
     </div>
 
-    <div class="container">
+    <div class="container" style="margin-top: 8px;">
       <div class="section">
         <div id="qrPreview"><p id="previewHint">បញ្ចូលអត្ថបទ ហើយចុចបង្កើត</p></div>
       </div>
@@ -848,12 +861,16 @@
   </div>
   
   <!-- Footer Contact Info -->
-  <div class="footer-bar" style="padding:32px 20px 32px 20px;color:#cbd5e1;text-align:center;font-size:14px;background:#0f172a;border-top:1px solid #1e293b;">
-    <div style="line-height:1.6;">
-      <span><span id="footerPhoneLabel">Phone:</span> <a href="tel:+8556699313199" style="color:#3b82f6;">+855 66/99 931319</a></span> | 
-      <span><span id="footerTelegramLabel">Telegram:</span> <a href="https://t.me/khemmy99" target="_blank" style="color:#3b82f6;">@khemmy99</a></span> | 
-      <span><span id="footerFacebookLabel">Facebook:</span> <a href="https://facebook.com/KMLOL" target="_blank" style="color:#3b82f6;">facebook.com/KMLOL</a></span> | 
-      <span><span id="footerCopyrightLabel">Copyright:</span> © 2026 <span id="footerAuthorName">Khem My</span>. <span id="footerRightsText">All rights reserved.</span></span>
+  <div class="footer-bar" style="padding:32px 20px 32px 20px;color:#cbd5e1;text-align:center;font-size:14px;background:#0f172a;">
+    <div style="line-height:1.8;">
+      <div style="margin-bottom:8px;">
+        <span><span id="footerPhoneLabel">Phone:</span> <a href="tel:+8556699313199" style="color:#3b82f6;">+855 66/99 931319</a></span> | 
+        <span><span id="footerTelegramLabel">Telegram:</span> <a href="https://t.me/khemmy99" target="_blank" style="color:#3b82f6;">@khemmy99</a></span> | 
+        <span><span id="footerFacebookLabel">Facebook:</span> <a href="https://facebook.com/KMLOL" target="_blank" style="color:#3b82f6;">facebook.com/KMLOL</a></span>
+      </div>
+      <div>
+        <span><span id="footerCopyrightLabel">Copyright:</span> © 2026 <span id="footerAuthorName">Khem My</span>. <span id="footerRightsText">All rights reserved.</span></span>
+      </div>
     </div>
   </div>
 
@@ -961,8 +978,32 @@
       const deviceIdDiv = document.getElementById('deviceIdInfo');
       if (deviceIdDiv && translations[currentLang]) {
         const t = translations[currentLang];
-        deviceIdDiv.innerHTML = '<span style="color:#f59e0b;font-size:13px;">' + t.deviceIdLabel + '</span><br><span style="font-family:monospace;font-size:15px;color:#3b82f6;">' + getDeviceId() + '</span>';
+        const deviceId = getDeviceId();
+        deviceIdDiv.innerHTML = '<span style="color:#f59e0b;font-size:13px;">' + t.deviceIdLabel + '</span><br><span id="deviceIdText" onclick="copyDeviceId()" style="font-family:monospace;font-size:15px;color:#3b82f6;cursor:pointer;padding:6px 12px;background:#1e293b;border-radius:8px;display:inline-block;margin-top:5px;border:1px solid #334155;" title="' + (currentLang === 'km' ? 'ចុចដើម្បីចម្លង' : 'Click to copy') + '">' + deviceId + ' 📋</span>';
       }
+    }
+
+    function copyDeviceId() {
+      const deviceId = getDeviceId();
+      navigator.clipboard.writeText(deviceId).then(function() {
+        const deviceIdText = document.getElementById('deviceIdText');
+        const originalText = deviceIdText.innerHTML;
+        deviceIdText.innerHTML = deviceId + ' ✅';
+        deviceIdText.style.background = '#166534';
+        setTimeout(function() {
+          deviceIdText.innerHTML = originalText;
+          deviceIdText.style.background = '#1e293b';
+        }, 1500);
+      }).catch(function() {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = deviceId;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        alert(currentLang === 'km' ? 'បានចម្លង Device ID!' : 'Device ID copied!');
+      });
     }
 
     window.handleBtnActivateLicense = function() {
@@ -1239,7 +1280,7 @@
         footerRights: 'រក្សាសិទ្ធិគ្រប់យ៉ាង។',
         footerAuthor: 'ខែម មី',
         alertCopied: 'បានចម្លងហើយ!',
-        confirmDeactivate: 'បិដសកម្ម?',
+        confirmDeactivate: 'ផ្តាច់សិទ្ធប្រើប្រាស់ពេញលេញ?',
         logoSelected: 'បានជ្រើសរើសឡូហ្គោ',
       }
     };
